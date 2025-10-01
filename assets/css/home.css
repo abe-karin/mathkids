@@ -1,0 +1,167 @@
+:root {
+    --primary-green: #64C9A6; 
+    --text-color: #333333; 
+    --text-dark: #2c3e50; 
+    --text-light: #5f7c8b; 
+    
+    --background-top: #B8E4F7; 
+    --background-middle: #FCF4C3; 
+    --background-bottom: #F6C2C2; 
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(
+        to bottom,
+        var(--background-top) 0%,
+        var(--background-middle) 50%,
+        var(--background-bottom) 100%
+    );
+    
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    color: var(--text-color);
+    text-align: center;
+    font-size: 16px;
+    padding: 20px 0; 
+}
+
+.main-content {
+    max-width: 600px;
+    width: 90%; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none; 
+}
+
+
+header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    background: none; 
+    position: relative;
+    overflow: hidden;
+    width: 100%; 
+}
+
+header::before {
+    content: none; 
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+    background-size: 200% 200%;
+    animation: textGradient 4s ease infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes textGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+header p {
+    color: var(--text-dark); 
+    font-size: 1.2rem;
+    font-weight: 400;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
+}
+
+.mascot-section {
+    width: 100%;
+    height: 350px; 
+    margin: 0 auto 40px; 
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; 
+    flex-grow: 1; 
+    background: none; 
+}
+
+.mascot-image {
+    width: 100%;
+    height: 100%; 
+    background-image: url('../images/dragao.png'); 
+    background-repeat: no-repeat;
+    background-position: center bottom; 
+    background-size: contain; 
+}
+
+
+.action-buttons {
+    padding: 20px 0 40px; 
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+    background: none; 
+}
+
+.action-buttons::before {
+    content: none;
+}
+
+.btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: background-color 0.2s, transform 0.1s;
+    color: white;
+    background-color: var(--primary-green);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    background-color: #57b396;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px 0;
+    }
+    
+    header {
+        padding: 20px 0 15px;
+    }
+    
+    .mascot-section {
+        height: 280px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main-content {
+        max-width: 800px; 
+    }
+    
+    .mascot-section {
+        height: 450px; 
+    }
+}

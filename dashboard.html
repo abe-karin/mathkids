@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MathKids</title>
+    <link rel="stylesheet" href="assets/css/shared.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #64C9A6 0%, #4CAF50 100%);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #64C9A6, #4CAF50);
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+
+        .user-icon {
+            font-size: 4rem;
+            color: #64C9A6;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            color: #2E8B57;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #64C9A6;
+        }
+
+        .user-info h3 {
+            margin: 0 0 15px 0;
+            color: #2E8B57;
+            font-size: 1.3rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            color: #64C9A6;
+            font-weight: 500;
+        }
+
+        .coming-soon {
+            background: linear-gradient(135deg, #FFF3CD, #FFF8E1);
+            border: 2px dashed #FFC107;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            color: #856404;
+        }
+
+        .coming-soon h3 {
+            margin: 0 0 15px 0;
+            color: #E67E22;
+            font-size: 1.5rem;
+        }
+
+        .coming-soon p {
+            margin: 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: #64C9A6;
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: #64C9A6;
+            margin-bottom: 10px;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            color: #2E8B57;
+            margin-bottom: 5px;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+
+        .mascot-corner {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 80px;
+            height: 80px;
+            background: url('assets/images/dragao.png') no-repeat center;
+            background-size: contain;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="user-icon">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h1 class="welcome-title">Usuário Logado</h1>
+            <p class="welcome-subtitle">
+                <span class="status-indicator"></span>
+                Bem-vindo ao MathKids!
+            </p>
+        </div>
+
+        <div class="user-info">
+            <h3><i class="fas fa-info-circle"></i> Informações do Usuário</h3>
+            <div class="info-item">
+                <span class="info-label">Nome:</span>
+                <span class="info-value" id="userName">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span class="info-value" id="userEmail">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tipo de Conta:</span>
+                <span class="info-value" id="userType">Usuário</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Login em:</span>
+                <span class="info-value" id="loginTime">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="info-value">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                    Online e Autenticado
+                </span>
+            </div>
+        </div>
+
+        <div class="coming-soon">
+            <h3><i class="fas fa-magic"></i> Recursos em Desenvolvimento</h3>
+            <p>🎮 Os módulos educativos de matemática estão sendo desenvolvidos para oferecer uma experiência mágica de aprendizado!</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="feature-title">Matemática Básica</div>
+                    <div class="feature-description">Contagem, soma e subtração para crianças de 3-9 anos</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="feature-title">Jogos Educativos</div>
+                    <div class="feature-description">Atividades interativas com nosso dragão mascote</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="feature-title">Sistema de Recompensas</div>
+                    <div class="feature-description">Conquistas e medalhas por progresso</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="feature-title">Acompanhamento</div>
+                    <div class="feature-description">Relatórios de progresso para pais</div>
+                </div>
+            </div>
+            
+            <p><strong>🚀 Previsão de lançamento:</strong> Primeiro módulo em desenvolvimento!</p>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            Sair
+        </button>
+
+        <div class="mascot-corner"></div>
+    </div>
+
+    <script>
+        // Verificar se o usuário está logado
+        function checkAuth() {
+            const userData = localStorage.getItem('mathkids_user') || sessionStorage.getItem('mathkids_user');
+            
+            if (!userData) {
+                alert('Acesso negado. Faça login primeiro.');
+                window.location.href = 'cadastro/entrar.html';
+                return;
+            }
+
+            try {
+                const user = JSON.parse(userData);
+                
+                // Exibir informações do usuário
+                document.getElementById('userName').textContent = user.nome || 'Usuário';
+                document.getElementById('userEmail').textContent = user.email || 'N/A';
+                document.getElementById('userType').textContent = 
+                    user.tipo === 'admin' ? 'Administrador' : 'Usuário Registrado';
+                
+                // Formatar data de login
+                if (user.loginTime) {
+                    const loginDate = new Date(user.loginTime);
+                    document.getElementById('loginTime').textContent = loginDate.toLocaleString('pt-BR');
+                } else {
+                    document.getElementById('loginTime').textContent = 'Sessão atual';
+                }
+
+                // Se for admin que chegou aqui por engano, oferecer redirecionamento
+                if (user.tipo === 'admin') {
+                    const adminRedirect = document.createElement('div');
+                    adminRedirect.innerHTML = `
+                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: center;">
+                            <i class="fas fa-crown" style="color: #f39c12;"></i>
+                            <strong>Acesso de Administrador Detectado!</strong><br>
+                            <button onclick="window.location.href='admin-dashboard.html'" 
+                                    style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-top: 10px; cursor: pointer;">
+                                Ir para Dashboard Admin
+                            </button>
+                        </div>
+                    `;
+                    document.querySelector('.user-info').after(adminRedirect);
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do usuário:', error);
+                // Em caso de erro, limpar dados corrompidos e redirecionar
+                localStorage.removeItem('mathkids_user');
+                sessionStorage.removeItem('mathkids_user');
+                alert('Sessão inválida. Faça login novamente.');
+                window.location.href = 'cadastro/entrar.html';
+            }
+        }
+
+        // Função de logout
+        function logout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                // Limpar dados de sessão
+                localStorage.removeItem('mathkids_user');
+                sessionStorage.removeItem('mathkids_user');
+                
+                // Redirecionar para página de login
+                alert('Logout realizado com sucesso!');
+                window.location.href = 'cadastro/entrar.html';
+            }
+        }
+
+        // Verificar autenticação ao carregar a página
+        document.addEventListener('DOMContentLoaded', checkAuth);
+
+        // Adicionar efeito de digitação no título
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            
+            type();
+        }
+
+        // Aplicar efeito após carregamento
+        setTimeout(() => {
+            const title = document.querySelector('.welcome-title');
+            if (title) {
+                typeWriter(title, 'Usuário Logado', 150);
+            }
+        }, 500);
+    </script>
+</body>
+</html>

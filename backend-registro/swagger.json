@@ -1,0 +1,703 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MathKids API",
+    "description": "API do MathKids - Aplicativo de ensino de matemática para crianças de 3 a 9 anos.\n\nEsta API gerencia o sistema de autenticação de responsáveis e futuramente incluirá endpoints para módulos educativos, progresso das crianças e gamificação.\n\n## Funcionalidades Atuais\n- Registro de responsáveis/pais\n- Sistema de autenticação seguro\n- Validação de dados\n\n## Funcionalidades Futuras\n- Login de usuários\n- Gestão de perfis de crianças\n- Módulos educativos de matemática\n- Sistema de progresso e recompensas\n\n## Como testar\n1. Acesse https://editor.swagger.io/\n2. Importe este arquivo JSON\n3. Use 'Try it out' para testar os endpoints",
+    "version": "1.0.0",
+    "contact": {
+      "name": "MathKids Team",
+      "url": "https://github.com/abe-karin/mathkids",
+      "email": "contato@mathkids.com"
+    },
+    "license": {
+      "name": "ISC",
+      "url": "https://opensource.org/licenses/ISC"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://mathkids-back.onrender.com",
+      "description": "🌐 Servidor de Produção (Render)"
+    },
+    {
+      "url": "http://localhost:5000",
+      "description": "🏠 Servidor de desenvolvimento local (porta 5000)"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "🏠 Servidor alternativo local (porta 3000)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Autenticação",
+      "description": "Endpoints para registro e login de responsáveis/pais"
+    },
+    {
+      "name": "Páginas",
+      "description": "Rotas para servir páginas HTML do frontend"
+    },
+    {
+      "name": "Educativo",
+      "description": "Endpoints para módulos educativos (futuro)"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Páginas"],
+        "summary": "Página inicial - Bem-vindo ao Mundo Mágico",
+        "description": "Serve a página principal de boas-vindas do MathKids com tema infantil",
+        "responses": {
+          "200": {
+            "description": "Página inicial carregada com sucesso",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<!DOCTYPE html><html><head><title>Bem-vindo ao Mundo Mágico!</title>..."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Sistema"],
+        "summary": "🏥 Verificação de saúde do servidor",
+        "description": "Endpoint básico de health check para verificar se o servidor está funcionando corretamente",
+        "responses": {
+          "200": {
+            "description": "✅ Servidor funcionando corretamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Servidor saudável",
+                    "value": {
+                      "status": "OK",
+                      "timestamp": "2024-01-15T10:30:00.000Z",
+                      "service": "MathKids API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/database": {
+      "get": {
+        "tags": ["Sistema"],
+        "summary": "🗄️ Verificação de conectividade com banco de dados",
+        "description": "Verifica se a conexão com o banco de dados PostgreSQL está funcionando corretamente",
+        "responses": {
+          "200": {
+            "description": "✅ Banco de dados conectado e funcionando",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseHealthResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Banco conectado com sucesso",
+                    "value": {
+                      "status": "OK",
+                      "database": "connected",
+                      "timestamp": "2024-01-15T10:30:00.000Z",
+                      "query_time": "12ms"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "❌ Erro de conexão com o banco de dados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                },
+                "examples": {
+                  "database_error": {
+                    "summary": "Falha na conexão com banco",
+                    "value": {
+                      "status": "ERROR",
+                      "database": "disconnected",
+                      "error": "Connection timeout",
+                      "timestamp": "2024-01-15T10:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cadastro": {
+      "get": {
+        "tags": ["Páginas"],
+        "summary": "Página de cadastro de responsáveis",
+        "description": "Serve a página de cadastro para pais/responsáveis",
+        "responses": {
+          "200": {
+            "description": "Página de cadastro carregada com sucesso",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<!DOCTYPE html><html><head><title>Cadastro - MathKids</title>..."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/register": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Registrar novo responsável/pai",
+        "description": "Cria uma nova conta para responsável no sistema MathKids.\n\n### Validações Implementadas:\n- ✅ Todos os campos são obrigatórios\n- ✅ Email deve ser único no sistema\n- ✅ Senha é criptografada com bcrypt (10 rounds)\n- ✅ Termos devem ser aceitos (true)\n- ✅ Data de nascimento deve ser válida\n\n### Segurança:\n- 🔐 Senhas hasheadas com bcrypt\n- 🔒 Conexão SSL com PostgreSQL\n- 🛡️ Validação contra SQL injection\n- 📧 Verificação de email duplicado",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroRequest"
+              },
+              "examples": {
+                "exemplo_completo": {
+                  "summary": "✅ Exemplo de registro completo e válido",
+                  "value": {
+                    "nomeDoResponsavel": "Maria Silva Santos",
+                    "email": "maria.santos@email.com",
+                    "senha": "minhasenhasegura123",
+                    "dataDeNascimento": "1985-03-15",
+                    "termosAceitos": true
+                  }
+                },
+                "exemplo_minimo": {
+                  "summary": "✅ Exemplo mínimo válido",
+                  "value": {
+                    "nomeDoResponsavel": "João",
+                    "email": "joao@teste.com",
+                    "senha": "123456",
+                    "dataDeNascimento": "1990-01-01",
+                    "termosAceitos": true
+                  }
+                },
+                "exemplo_erro": {
+                  "summary": "❌ Exemplo que gerará erro (email duplicado)",
+                  "value": {
+                    "nomeDoResponsavel": "Usuário Teste",
+                    "email": "usuario@existente.com",
+                    "senha": "senha123",
+                    "dataDeNascimento": "1988-12-25",
+                    "termosAceitos": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "✅ Usuário registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistroSucessoResponse"
+                },
+                "examples": {
+                  "sucesso": {
+                    "summary": "Registro bem-sucedido",
+                    "value": {
+                      "message": "Usuário registrado com sucesso!",
+                      "user": {
+                        "id": 42,
+                        "email": "maria.santos@email.com",
+                        "nome_responsavel": "Maria Silva Santos"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "❌ Dados inválidos ou campos obrigatórios ausentes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                },
+                "examples": {
+                  "campos_obrigatorios": {
+                    "summary": "Campos obrigatórios faltando",
+                    "value": {
+                      "message": "Erro: Todos os campos são obrigatórios, incluindo a aceitação dos termos."
+                    }
+                  },
+                  "email_invalido": {
+                    "summary": "Email com formato inválido",
+                    "value": {
+                      "message": "Erro: Email deve ter um formato válido."
+                    }
+                  },
+                  "termos_nao_aceitos": {
+                    "summary": "Termos não aceitos",
+                    "value": {
+                      "message": "Erro: É necessário aceitar os termos de uso."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "❌ Conflito - Email já está em uso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                },
+                "examples": {
+                  "email_duplicado": {
+                    "summary": "Email já cadastrado no sistema",
+                    "value": {
+                      "message": "Erro: O e-mail fornecido já está em uso."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "❌ Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                },
+                "examples": {
+                  "erro_servidor": {
+                    "summary": "Erro do servidor ou banco de dados",
+                    "value": {
+                      "message": "Erro interno do servidor ao tentar registrar o usuário."
+                    }
+                  },
+                  "erro_banco": {
+                    "summary": "Erro de conexão com banco",
+                    "value": {
+                      "message": "Erro de conexão com o banco de dados."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "🔑 Fazer login no sistema",
+        "description": "Autentica um usuário registrado no sistema MathKids.\n\n### Credenciais de Teste:\n- **Admin:** `adm@email.com` / `123456`\n- **Usuário:** Use credenciais de um usuário registrado\n\n### Funcionalidades:\n- 🔐 Verificação de senha com bcrypt\n- 🔒 Autenticação segura\n- 💾 Opção de \"Lembrar-me\"\n- 🎯 Redirecionamento automático",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "examples": {
+                "admin_login": {
+                  "summary": "👑 Login como Administrador",
+                  "value": {
+                    "email": "adm@email.com",
+                    "senha": "123456",
+                    "rememberMe": true
+                  }
+                },
+                "user_login": {
+                  "summary": "👤 Login de Usuário Normal",
+                  "value": {
+                    "email": "maria.santos@email.com",
+                    "senha": "minhasenha123",
+                    "rememberMe": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "✅ Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSucessoResponse"
+                },
+                "examples": {
+                  "login_success": {
+                    "summary": "Login bem-sucedido",
+                    "value": {
+                      "message": "Login realizado com sucesso!",
+                      "user": {
+                        "id": 1,
+                        "email": "maria.santos@email.com",
+                        "nome": "Maria Silva Santos",
+                        "tipo": "usuario"
+                      },
+                      "token": "token_1_1642234567890",
+                      "rememberMe": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "❌ Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                },
+                "examples": {
+                  "campos_obrigatorios": {
+                    "summary": "Campos obrigatórios faltando",
+                    "value": {
+                      "message": "Erro: Email e senha são obrigatórios."
+                    }
+                  },
+                  "email_invalido": {
+                    "summary": "Formato de email inválido",
+                    "value": {
+                      "message": "Erro: Formato de email inválido."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "❌ Credenciais inválidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                },
+                "examples": {
+                  "credenciais_incorretas": {
+                    "summary": "Email ou senha incorretos",
+                    "value": {
+                      "message": "Erro: Email ou senha incorretos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "❌ Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                },
+                "examples": {
+                  "erro_servidor": {
+                    "summary": "Erro do servidor",
+                    "value": {
+                      "message": "Erro interno do servidor ao tentar fazer login."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegistroRequest": {
+        "type": "object",
+        "required": [
+          "nomeDoResponsavel",
+          "email",
+          "senha",
+          "dataDeNascimento",
+          "termosAceitos"
+        ],
+        "properties": {
+          "nomeDoResponsavel": {
+            "type": "string",
+            "description": "Nome completo do responsável/pai da criança",
+            "example": "Maria Silva Santos",
+            "minLength": 2,
+            "maxLength": 255,
+            "pattern": "^[A-Za-zÀ-ÿ\\s]+$"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email único do responsável (usado para login)",
+            "example": "maria.santos@email.com",
+            "maxLength": 255
+          },
+          "senha": {
+            "type": "string",
+            "description": "Senha do usuário (será criptografada com bcrypt)",
+            "example": "minhasenhasegura123",
+            "minLength": 6,
+            "maxLength": 100
+          },
+          "dataDeNascimento": {
+            "type": "string",
+            "format": "date",
+            "description": "Data de nascimento do responsável no formato YYYY-MM-DD",
+            "example": "1985-03-15"
+          },
+          "termosAceitos": {
+            "type": "boolean",
+            "description": "Confirmação obrigatória de aceitação dos termos de uso",
+            "example": true,
+            "enum": [true]
+          }
+        }
+      },
+      "RegistroSucessoResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Mensagem de confirmação do registro",
+            "example": "Usuário registrado com sucesso!"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UsuarioResponse"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "senha"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email do usuário registrado",
+            "example": "maria.santos@email.com"
+          },
+          "senha": {
+            "type": "string",
+            "description": "Senha do usuário",
+            "example": "minhasenha123",
+            "minLength": 3
+          },
+          "rememberMe": {
+            "type": "boolean",
+            "description": "Manter usuário logado",
+            "example": false,
+            "default": false
+          }
+        }
+      },
+      "LoginSucessoResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Mensagem de confirmação do login",
+            "example": "Login realizado com sucesso!"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "ID do usuário",
+                "example": 1
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Email do usuário",
+                "example": "maria.santos@email.com"
+              },
+              "nome": {
+                "type": "string",
+                "description": "Nome do usuário",
+                "example": "Maria Silva Santos"
+              },
+              "tipo": {
+                "type": "string",
+                "description": "Tipo de usuário",
+                "example": "usuario",
+                "enum": ["usuario", "admin"]
+              }
+            }
+          },
+          "token": {
+            "type": "string",
+            "description": "Token de autenticação",
+            "example": "token_1_1642234567890"
+          },
+          "rememberMe": {
+            "type": "boolean",
+            "description": "Se o usuário escolheu ser lembrado",
+            "example": true
+          }
+        }
+      },
+      "UsuarioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID único do usuário no banco PostgreSQL",
+            "example": 42
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email do usuário registrado",
+            "example": "maria.santos@email.com"
+          },
+          "nome_responsavel": {
+            "type": "string",
+            "description": "Nome do responsável cadastrado",
+            "example": "Maria Silva Santos"
+          }
+        }
+      },
+      "ErroResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Descrição detalhada do erro ocorrido",
+            "example": "Erro: Todos os campos são obrigatórios, incluindo a aceitação dos termos."
+          }
+        }
+      },
+      "CriancaProfile": {
+        "type": "object",
+        "description": "Perfil da criança (implementação futura)",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "example": "João Pedro"
+          },
+          "idade": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 9,
+            "example": 6
+          },
+          "nivel_matematica": {
+            "type": "string",
+            "enum": ["iniciante", "basico", "intermediario"],
+            "example": "basico"
+          },
+          "responsavel_id": {
+            "type": "integer",
+            "example": 42
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Status do servidor",
+            "example": "OK",
+            "enum": ["OK"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp ISO 8601 da verificação",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "service": {
+            "type": "string",
+            "description": "Nome do serviço",
+            "example": "MathKids API"
+          }
+        },
+        "required": ["status", "timestamp", "service"]
+      },
+      "DatabaseHealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Status da conexão com banco",
+            "example": "OK",
+            "enum": ["OK", "ERROR"]
+          },
+          "database": {
+            "type": "string",
+            "description": "Status da conectividade",
+            "example": "connected",
+            "enum": ["connected", "disconnected"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp da verificação",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "query_time": {
+            "type": "string",
+            "description": "Tempo de resposta da consulta de teste",
+            "example": "12ms"
+          },
+          "error": {
+            "type": "string",
+            "description": "Mensagem de erro (apenas em caso de falha)",
+            "example": "Connection timeout"
+          }
+        },
+        "required": ["status", "database", "timestamp"]
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Token JWT para autenticação (implementação futura para login)"
+      }
+    }
+  },
+  "security": [],
+  "externalDocs": {
+    "description": "📚 Documentação completa do MathKids no GitHub",
+    "url": "https://github.com/abe-karin/mathkids/blob/main/README.md"
+  }
+}

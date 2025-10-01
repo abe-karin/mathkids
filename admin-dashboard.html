@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - MathKids</title>
+    <link rel="stylesheet" href="assets/css/shared.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #64C9A6, #4CAF50);
+        }
+
+        .admin-header {
+            margin-bottom: 30px;
+        }
+
+        .admin-icon {
+            font-size: 4rem;
+            color: #64C9A6;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            color: #2E8B57;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #64C9A6;
+        }
+
+        .user-info h3 {
+            margin: 0 0 15px 0;
+            color: #2E8B57;
+            font-size: 1.3rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            color: #64C9A6;
+            font-weight: 500;
+        }
+
+        .admin-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #64C9A6, #4CAF50);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(100, 201, 166, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #FF6B6B, #EE5A52);
+        }
+
+        .action-btn.secondary:hover {
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+
+        .mascot-corner {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 80px;
+            height: 80px;
+            background: url('assets/images/dragao.png') no-repeat center;
+            background-size: contain;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .admin-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="admin-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h1 class="welcome-title">Usuário Logado</h1>
+            <p class="welcome-subtitle">
+                <span class="status-indicator"></span>
+                Acesso autorizado como Administrador
+            </p>
+        </div>
+
+        <div class="user-info">
+            <h3><i class="fas fa-info-circle"></i> Informações da Sessão</h3>
+            <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span class="info-value" id="userEmail">adm@email.com</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tipo de Usuário:</span>
+                <span class="info-value" id="userType">Administrador</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Login em:</span>
+                <span class="info-value" id="loginTime">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="info-value">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                    Conectado
+                </span>
+            </div>
+        </div>
+
+        <div class="admin-actions">
+            <button class="action-btn" onclick="viewUsers()">
+                <i class="fas fa-users"></i>
+                Ver Usuários
+            </button>
+            <button class="action-btn" onclick="viewReports()">
+                <i class="fas fa-chart-bar"></i>
+                Relatórios
+            </button>
+            <button class="action-btn" onclick="viewSettings()">
+                <i class="fas fa-cog"></i>
+                Configurações
+            </button>
+            <button class="action-btn secondary" onclick="viewLogs()">
+                <i class="fas fa-file-alt"></i>
+                Logs do Sistema
+            </button>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            Sair
+        </button>
+
+        <div class="mascot-corner"></div>
+    </div>
+
+    <script>
+        // Verificar se o usuário está logado
+        function checkAuth() {
+            const adminData = localStorage.getItem('mathkids_admin') || sessionStorage.getItem('mathkids_admin');
+            const userData = localStorage.getItem('mathkids_user') || sessionStorage.getItem('mathkids_user');
+            
+            // Verificar se é admin específico ou usuário com tipo admin
+            let currentUser = null;
+            
+            if (adminData) {
+                currentUser = JSON.parse(adminData);
+            } else if (userData) {
+                const user = JSON.parse(userData);
+                if (user.tipo === 'admin') {
+                    currentUser = user;
+                }
+            }
+            
+            if (!currentUser) {
+                alert('Acesso negado. Apenas administradores podem acessar esta página.');
+                window.location.href = 'cadastro/entrar.html';
+                return;
+            }
+
+            try {
+                // Exibir informações do admin
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userType').textContent = 
+                    currentUser.tipo === 'admin' ? 'Administrador' : 'Administrador do Sistema';
+                
+                // Formatar data de login
+                if (currentUser.loginTime) {
+                    const loginDate = new Date(currentUser.loginTime);
+                    document.getElementById('loginTime').textContent = loginDate.toLocaleString('pt-BR');
+                } else {
+                    document.getElementById('loginTime').textContent = 'Sessão atual';
+                }
+                
+                // Mostrar informação adicional se for admin do banco
+                if (currentUser.id && currentUser.nome) {
+                    document.getElementById('userType').textContent = 'Admin Registrado no Sistema';
+                    
+                    // Adicionar informação de nome se disponível
+                    const nameInfo = document.createElement('div');
+                    nameInfo.className = 'info-item';
+                    nameInfo.innerHTML = `
+                        <span class="info-label">Nome:</span>
+                        <span class="info-value">${currentUser.nome}</span>
+                    `;
+                    document.getElementById('userEmail').closest('.info-item').after(nameInfo);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados do administrador:', error);
+                // Em caso de erro, limpar dados e redirecionar
+                localStorage.removeItem('mathkids_admin');
+                sessionStorage.removeItem('mathkids_admin');
+                localStorage.removeItem('mathkids_user');
+                sessionStorage.removeItem('mathkids_user');
+                alert('Sessão inválida. Faça login novamente.');
+                window.location.href = 'cadastro/entrar.html';
+            }
+        }
+
+        // Funções dos botões de ação
+        function viewUsers() {
+            alert('Funcionalidade "Ver Usuários" em desenvolvimento.\n\nEsta área permitirá visualizar todos os usuários cadastrados no sistema.');
+        }
+
+        function viewReports() {
+            alert('Funcionalidade "Relatórios" em desenvolvimento.\n\nAqui você poderá ver estatísticas de uso, progresso das crianças e outros relatórios.');
+        }
+
+        function viewSettings() {
+            alert('Funcionalidade "Configurações" em desenvolvimento.\n\nEsta seção permitirá configurar parâmetros do sistema.');
+        }
+
+        function viewLogs() {
+            alert('Funcionalidade "Logs do Sistema" em desenvolvimento.\n\nAqui você poderá visualizar logs de atividade e erros do sistema.');
+        }
+
+        // Função de logout
+        function logout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                // Limpar todos os dados de sessão
+                localStorage.removeItem('mathkids_admin');
+                sessionStorage.removeItem('mathkids_admin');
+                localStorage.removeItem('mathkids_user');
+                sessionStorage.removeItem('mathkids_user');
+                
+                // Redirecionar para página de login
+                alert('Logout realizado com sucesso!');
+                window.location.href = 'cadastro/entrar.html';
+            }
+        }
+
+        // Verificar autenticação ao carregar a página
+        document.addEventListener('DOMContentLoaded', checkAuth);
+
+        // Adicionar efeito de digitação no título
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            
+            type();
+        }
+
+        // Aplicar efeito após carregamento
+        setTimeout(() => {
+            const title = document.querySelector('.welcome-title');
+            if (title) {
+                typeWriter(title, 'Usuário Logado', 150);
+            }
+        }, 500);
+    </script>
+</body>
+</html>

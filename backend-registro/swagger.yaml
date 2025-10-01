@@ -1,0 +1,340 @@
+openapi: 3.0.3
+info:
+  title: MathKids API
+  description: |
+    API do MathKids - Aplicativo de ensino de matemática para crianças de 3 a 9 anos.
+    
+    Esta API gerencia o sistema de autenticação de responsáveis e futuramente incluirá
+    endpoints para módulos educativos, progresso das crianças e gamificação.
+    
+    ## Funcionalidades Atuais
+    - Registro de responsáveis/pais
+    - Sistema de autenticação seguro
+    - Validação de dados
+    
+    
+  version: 1.0.0
+  contact:
+    name: MathKids Team
+    url: https://github.com/abe-karin/mathkids
+  license:
+    name: ISC
+    url: https://opensource.org/licenses/ISC
+
+servers:
+  - url: https://mathkids-back.onrender.com
+    description: 🌐 Servidor de Produção (Render)
+  - url: http://localhost:5000
+    description: 🏠 Servidor de desenvolvimento local
+  - url: http://localhost:3000
+    description: 🏠 Servidor alternativo local
+
+tags:
+  - name: Autenticação
+    description: Endpoints para registro e login de responsáveis
+  - name: Páginas
+    description: Rotas para servir páginas HTML do frontend
+
+paths:
+  /:
+    get:
+      tags:
+        - Páginas
+      summary: Página inicial
+      description: Serve a página principal de boas-vindas do MathKids
+      responses:
+        '200':
+          description: Página inicial carregada com sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<!DOCTYPE html>..."
+
+  /health:
+    get:
+      tags:
+        - Sistema
+      summary: Verificação de saúde do servidor
+      description: Endpoint básico de health check para verificar se o servidor está funcionando
+      responses:
+        '200':
+          description: Servidor funcionando corretamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/database:
+    get:
+      tags:
+        - Sistema
+      summary: Verificação de conectividade com banco
+      description: Verifica se a conexão com PostgreSQL está funcionando
+      responses:
+        '200':
+          description: Banco de dados conectado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseHealthResponse'
+        '500':
+          description: Erro de conexão com banco
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+
+  /cadastro:
+    get:
+      tags:
+        - Páginas
+      summary: Página de cadastro
+      description: Serve a página de cadastro de responsáveis
+      responses:
+        '200':
+          description: Página de cadastro carregada com sucesso
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<!DOCTYPE html>..."
+
+  /api/register:
+    post:
+      tags:
+        - Autenticação
+      summary: Registrar novo responsável
+      description: |
+        Cria uma nova conta para responsável/pai no sistema MathKids.
+        
+        ## Validações:
+        - Todos os campos são obrigatórios
+        - Email deve ser único no sistema
+        - Senha é criptografada com bcrypt (10 rounds)
+        - Termos devem ser aceitos (true)
+        
+        ## Segurança:
+        - Senhas são hasheadas com bcrypt
+        - Conexão SSL com banco PostgreSQL
+        - Validação de duplicidade de email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroRequest'
+            examples:
+              exemplo_completo:
+                summary: Exemplo de registro completo
+                value:
+                  nomeDoResponsavel: "Maria Silva Santos"
+                  email: "maria.santos@email.com"
+                  senha: "minhasenha123"
+                  dataDeNascimento: "1985-03-15"
+                  termosAceitos: true
+              exemplo_minimo:
+                summary: Exemplo mínimo válido
+                value:
+                  nomeDoResponsavel: "João"
+                  email: "joao@teste.com"
+                  senha: "123456"
+                  dataDeNascimento: "1990-01-01"
+                  termosAceitos: true
+      responses:
+        '201':
+          description: Usuário registrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistroSucessoResponse'
+              examples:
+                sucesso:
+                  summary: Registro bem-sucedido
+                  value:
+                    message: "Usuário registrado com sucesso!"
+                    user:
+                      id: 42
+                      email: "maria.santos@email.com"
+                      nome_responsavel: "Maria Silva Santos"
+        '400':
+          description: Dados inválidos ou campos obrigatórios ausentes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+              examples:
+                campos_obrigatorios:
+                  summary: Campos obrigatórios faltando
+                  value:
+                    message: "Erro: Todos os campos são obrigatórios, incluindo a aceitação dos termos."
+                email_invalido:
+                  summary: Email inválido
+                  value:
+                    message: "Erro: Email deve ter um formato válido."
+        '409':
+          description: Email já está em uso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+              examples:
+                email_duplicado:
+                  summary: Email já cadastrado
+                  value:
+                    message: "Erro: O e-mail fornecido já está em uso."
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroResponse'
+              examples:
+                erro_servidor:
+                  summary: Erro do servidor
+                  value:
+                    message: "Erro interno do servidor ao tentar registrar o usuário."
+
+components:
+  schemas:
+    RegistroRequest:
+      type: object
+      required:
+        - nomeDoResponsavel
+        - email
+        - senha
+        - dataDeNascimento
+        - termosAceitos
+      properties:
+        nomeDoResponsavel:
+          type: string
+          description: Nome completo do responsável/pai
+          example: "Maria Silva Santos"
+          minLength: 2
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          description: Email único do responsável
+          example: "maria.santos@email.com"
+          maxLength: 255
+        senha:
+          type: string
+          description: Senha do usuário (será criptografada)
+          example: "minhasenha123"
+          minLength: 6
+          maxLength: 100
+        dataDeNascimento:
+          type: string
+          format: date
+          description: Data de nascimento do responsável
+          example: "1985-03-15"
+        termosAceitos:
+          type: boolean
+          description: Confirmação de aceitação dos termos de uso
+          example: true
+          enum: [true]
+
+    RegistroSucessoResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensagem de confirmação
+          example: "Usuário registrado com sucesso!"
+        user:
+          $ref: '#/components/schemas/UsuarioResponse'
+
+    UsuarioResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único do usuário no banco de dados
+          example: 42
+        email:
+          type: string
+          format: email
+          description: Email do usuário
+          example: "maria.santos@email.com"
+        nome_responsavel:
+          type: string
+          description: Nome do responsável
+          example: "Maria Silva Santos"
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - service
+      properties:
+        status:
+          type: string
+          enum: [OK]
+          description: Status do servidor
+          example: "OK"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp da verificação
+          example: "2024-01-15T10:30:00.000Z"
+        service:
+          type: string
+          description: Nome do serviço
+          example: "MathKids API"
+
+    DatabaseHealthResponse:
+      type: object
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [OK, ERROR]
+          description: Status da conexão
+          example: "OK"
+        database:
+          type: string
+          enum: [connected, disconnected]
+          description: Status da conectividade
+          example: "connected"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp da verificação
+          example: "2024-01-15T10:30:00.000Z"
+        query_time:
+          type: string
+          description: Tempo de resposta da consulta
+          example: "12ms"
+        error:
+          type: string
+          description: Mensagem de erro (apenas em falhas)
+          example: "Connection timeout"
+
+    ErroResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Descrição detalhada do erro
+          example: "Erro: Todos os campos são obrigatórios, incluindo a aceitação dos termos."
+
+  securitySchemes:
+    # Para futuras implementações de autenticação
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT para autenticação (implementação futura)
+
+# Configurações globais
+security: []
+
+# Informações adicionais sobre a API
+externalDocs:
+  description: Documentação completa do MathKids
+  

@@ -1,0 +1,306 @@
+:root {
+    --primary-green: #66c4a6;
+    --secondary-green: #57b396;
+    --light-green: #e8f5f1;
+    --accent-green: #4ecdc4;
+    --gradient-start: #667eea;
+    --gradient-middle: #764ba2;
+    --gradient-end: #667eea;
+    --green-gradient-start: #56ab2f;
+    --green-gradient-end: #a8e6cf;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --white: #ffffff;
+    --border-color: #ddd;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius: 10px;
+    --transition: all 0.2s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, 
+        #667eea 0%, 
+        #764ba2 25%, 
+        #66c4a6 50%, 
+        #56ab2f 75%, 
+        #a8e6cf 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    color: var(--text-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.mascot-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 20px;
+    background: none; 
+    position: relative;
+}
+
+.mascot-section::before {
+    content: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+.mascot-image {
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+    background-image: url('../images/dragao.png');
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: contain;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    transition: transform 0.3s ease;
+}
+
+.mascot-image:hover {
+    transform: scale(1.05);
+}
+
+.btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: var(--transition);
+    color: var(--white);
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, 
+        var(--primary-green) 0%, 
+        var(--secondary-green) 50%, 
+        var(--accent-green) 100%);
+    background-size: 200% 200%;
+    animation: buttonGradient 3s ease infinite;
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, 
+        var(--secondary-green) 0%, 
+        #4a9a7e 50%, 
+        var(--primary-green) 100%);
+    background-size: 200% 200%;
+    animation: buttonGradient 3s ease infinite reverse;
+}
+
+@keyframes buttonGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    background-size: 150% 150%;
+}
+
+.secondary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--white);
+    box-shadow: var(--shadow);
+}
+
+.form-section {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-card h2 {
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.form-card p {
+    color: var(--text-light);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"] {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    margin-bottom: 20px;
+    transition: var(--transition);
+    background-color: var(--white);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(102, 196, 166, 0.1);
+}
+
+input::placeholder {
+    color: var(--text-light);
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 25px;
+    gap: 10px;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin: 0;
+    width: auto;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.checkbox-container label {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.login-link a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.input-with-icon {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-with-icon input {
+    margin-bottom: 0;
+    padding-right: 45px;
+}
+
+.input-with-icon i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        min-height: auto;
+    }
+    
+    .mascot-section {
+        min-height: 200px;
+        order: 1;
+    }
+    
+    .form-section {
+        order: 2;
+        padding: 20px;
+    }
+    
+    .mascot-image {
+        min-height: 180px;
+    }
+}
+
+@media (min-width: 769px) {
+    .mascot-section {
+        flex: 1;
+        min-height: 450px;
+    }
+    
+    .mascot-image {
+        min-height: 400px;
+    }
+}
