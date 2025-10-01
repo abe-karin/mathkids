@@ -7,21 +7,37 @@
     <link rel="stylesheet" href="assets/css/shared.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Usando as variáveis CSS do projeto */
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, 
+                var(--gradient-start) 0%, 
+                var(--gradient-middle) 25%, 
+                var(--primary-green) 50%, 
+                var(--green-gradient-start) 75%, 
+                var(--green-gradient-end) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #64C9A6 0%, #4CAF50 100%);
-            font-family: 'Arial', sans-serif;
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .dashboard-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
             padding: 40px;
             text-align: center;
             max-width: 600px;
@@ -37,7 +53,7 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(90deg, #64C9A6, #4CAF50);
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
         }
 
         .dashboard-header {
@@ -46,7 +62,7 @@
 
         .user-icon {
             font-size: 4rem;
-            color: #64C9A6;
+            color: var(--primary-green);
             margin-bottom: 20px;
             animation: bounce 2s infinite;
         }
@@ -65,28 +81,28 @@
 
         .welcome-title {
             font-size: 2.5rem;
-            color: #2E8B57;
+            color: var(--text-dark);
             margin-bottom: 10px;
             font-weight: bold;
         }
 
         .welcome-subtitle {
             font-size: 1.2rem;
-            color: #666;
+            color: var(--text-light);
             margin-bottom: 30px;
         }
 
         .user-info {
-            background: #f8f9fa;
-            border-radius: 15px;
+            background: var(--light-green);
+            border-radius: var(--border-radius);
             padding: 20px;
             margin: 20px 0;
-            border-left: 4px solid #64C9A6;
+            border-left: 4px solid var(--primary-green);
         }
 
         .user-info h3 {
             margin: 0 0 15px 0;
-            color: #2E8B57;
+            color: var(--text-dark);
             font-size: 1.3rem;
         }
 
@@ -96,7 +112,7 @@
             align-items: center;
             margin: 10px 0;
             padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .info-item:last-child {
@@ -105,26 +121,26 @@
 
         .info-label {
             font-weight: bold;
-            color: #555;
+            color: var(--text-light);
         }
 
         .info-value {
-            color: #64C9A6;
+            color: var(--primary-green);
             font-weight: 500;
         }
 
         .coming-soon {
-            background: linear-gradient(135deg, #FFF3CD, #FFF8E1);
-            border: 2px dashed #FFC107;
-            border-radius: 15px;
+            background: linear-gradient(135deg, var(--light-green), #f0f8f5);
+            border: 2px dashed var(--primary-green);
+            border-radius: var(--border-radius);
             padding: 30px;
             margin: 20px 0;
-            color: #856404;
+            color: var(--text-dark);
         }
 
         .coming-soon h3 {
             margin: 0 0 15px 0;
-            color: #E67E22;
+            color: var(--secondary-green);
             font-size: 1.5rem;
         }
 
@@ -142,51 +158,74 @@
         }
 
         .feature-card {
-            background: #f8f9fa;
-            border-radius: 10px;
+            background: var(--light-green);
+            border-radius: var(--border-radius);
             padding: 20px;
             text-align: center;
             border: 2px solid transparent;
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
 
         .feature-card:hover {
-            border-color: #64C9A6;
+            border-color: var(--primary-green);
             transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .feature-icon {
             font-size: 2rem;
-            color: #64C9A6;
+            color: var(--primary-green);
             margin-bottom: 10px;
         }
 
         .feature-title {
             font-weight: bold;
-            color: #2E8B57;
+            color: var(--text-dark);
             margin-bottom: 5px;
         }
 
         .feature-description {
             font-size: 0.9rem;
-            color: #666;
+            color: var(--text-light);
         }
 
         .logout-btn {
-            background: #dc3545;
-            color: white;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: var(--white);
             border: none;
-            padding: 10px 30px;
-            border-radius: 25px;
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 1rem;
+            font-weight: 600;
             margin-top: 20px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.5s ease;
+        }
+
+        .logout-btn:hover::before {
+            left: 100%;
         }
 
         .logout-btn:hover {
-            background: #c82333;
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
         }
 
         .status-indicator {
@@ -220,6 +259,7 @@
             background: url('assets/images/dragao.png') no-repeat center;
             background-size: contain;
             opacity: 0.3;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
 
         @media (max-width: 768px) {
@@ -382,11 +422,28 @@
         }
 
         // Função de logout
-        function logout() {
+        async function logout() {
             if (confirm('Tem certeza que deseja sair?')) {
-                // Limpar dados de sessão
+                try {
+                    // Chamar API de logout para limpar token do servidor
+                    await fetch('http://localhost:5000/api/logout', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Accept': 'application/json',
+                        }
+                    });
+                    
+                    console.log('✅ Token removido do servidor');
+                } catch (error) {
+                    console.error('Erro ao fazer logout no servidor:', error);
+                }
+                
+                // Limpar dados de sessão locais
                 localStorage.removeItem('mathkids_user');
+                localStorage.removeItem('mathkids_admin');
                 sessionStorage.removeItem('mathkids_user');
+                sessionStorage.removeItem('mathkids_admin');
                 
                 // Redirecionar para página de login
                 alert('Logout realizado com sucesso!');

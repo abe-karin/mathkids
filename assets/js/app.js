@@ -1,8 +1,20 @@
-// app.js - MathKids Frontend Application
+// ================================================
+// APP.JS - MATHKIDS FRONTEND APPLICATION
+// ================================================
+// Aplicativo principal do MathKids que gerencia:
+// - Integração com a API do backend
+// - Conexão com documentação Swagger
+// - Testes de conectividade da API
+// - Notificações para o usuário
+// - Detecção automática de ambiente
+// 
+// Este arquivo é utilizado principalmente na página inicial
+// para verificar status da API e fornecer acesso à documentação
+// ================================================
 
 /**
- * Aplicativo principal do MathKids
- * Gerencia a integração com a API do backend e Swagger
+ * Classe principal da aplicação MathKids
+ * Gerencia a integração entre frontend e backend
  */
 
 class MathKidsApp {
@@ -15,26 +27,34 @@ class MathKidsApp {
     }
 
     /**
-     * Detecta automaticamente a URL base da API baseada no ambiente
+     * Detecta automaticamente a URL base da API baseada no ambiente atual
+     * Utiliza o hostname da página para determinar se estamos em:
+     * - Desenvolvimento local (localhost)
+     * - Produção (Render ou outros serviços)
+     * @returns {string} URL base da API apropriada para o ambiente
      */
     getApiBaseUrl() {
         const hostname = window.location.hostname;
         const protocol = window.location.protocol;
         
-        // Se estivermos em localhost, usar desenvolvimento local
+        // Ambiente de desenvolvimento local
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             return 'http://localhost:5000';
         }
         
-        // Se estivermos em produção (Render ou outro), usar URL de produção
+        // Ambiente de produção (Render ou serviços similares)
         if (hostname.includes('onrender.com') || hostname.includes('mathkids')) {
             return 'https://mathkids-back.onrender.com';
         }
         
-        // Fallback: tentar usar a mesma origem do frontend
+        // Fallback: usar mesmo protocolo e hostname com porta 5000
         return `${protocol}//${hostname}:5000`;
     }
 
+    /**
+     * Inicializa a aplicação MathKids
+     * Configura event listeners e verifica conexão com a API
+     */
     init() {
         console.log('🐉 MathKids App iniciado!');
         this.setupEventListeners();
@@ -42,16 +62,17 @@ class MathKidsApp {
     }
 
     /**
-     * Configura os event listeners para botões e formulários
+     * Configura todos os event listeners para botões e elementos interativos
+     * Inclui botões para acessar Swagger e testar conectividade da API
      */
     setupEventListeners() {
-        // Botão para abrir documentação Swagger
+        // Botão para abrir documentação Swagger em nova aba
         const swaggerBtn = document.getElementById('swagger-docs-btn');
         if (swaggerBtn) {
             swaggerBtn.addEventListener('click', () => this.openSwaggerDocs());
         }
 
-        // Botão de teste de API
+        // Botão para executar teste manual de conectividade da API
         const testApiBtn = document.getElementById('test-api-btn');
         if (testApiBtn) {
             testApiBtn.addEventListener('click', () => this.testAPIConnection());

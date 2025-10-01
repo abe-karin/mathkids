@@ -1,29 +1,68 @@
+<!--
+================================================
+PÁGINA DE LOGIN - MATHKIDS
+================================================
+Esta página implementa o sistema completo de autenticação do MathKids:
+
+🔐 FUNCIONALIDADES:
+- Login dual: admin (adm@email.com/123456) + usuários do banco
+- Sistema "lembrar de mim" com tokens seguros
+- Auto-login inteligente baseado em cookies
+- Validação em tempo real de formulários
+- Toggle de visibilidade de senha
+- Design responsivo otimizado para crianças
+
+🎨 DESIGN:
+- Tema infantil com cores amigáveis
+- Mascote dragão para deixar crianças confortáveis
+- Animações suaves e feedback visual
+- Acessibilidade com ARIA labels
+
+🔧 INTEGRAÇÃO:
+- API backend: /api/login
+- JavaScript: login.js (sistema completo)
+- CSS: entrar.css + shared.css
+- Auto-detecção de ambiente dev/prod
+================================================
+-->
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar - Mundo Mágico</title>
+    <title>Entrar - MathKids 🐉</title>
+    
+    <!-- Estilos: compartilhado + específico da página -->
     <link rel="stylesheet" href="../assets/css/shared.css">
     <link rel="stylesheet" href="../assets/css/entrar.css">
+    
+    <!-- Ícones Font Awesome para UI -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- Container principal do login -->
     <div class="login-container">
         
+        <!-- Seção do mascote - dragão amigável para tranquilizar crianças -->
         <div class="mascot-section">
-            <div class="mascot-image" role="img" aria-label="Um dragão verde e fofo sentado em blocos, segurando um tablet."></div>
+            <div class="mascot-image" role="img" aria-label="Dragão verde e fofo do MathKids segurando um tablet"></div>
         </div>
 
+        <!-- Formulário de login com validação em tempo real -->
         <form id="loginForm">
+            <!-- Campo de email com validação automática -->
             <input type="email" id="email" placeholder="E-mail" required>
 
+            <!-- Grupo de senha com toggle de visibilidade -->
             <div class="input-password-group">
                 <input type="password" id="password" placeholder="Senha" required>
-                <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                <i class="fas fa-eye password-toggle" id="togglePassword" aria-label="Mostrar/esconder senha"></i>
             </div>
 
+            <!-- Opções: Lembrar de mim + Esqueci senha -->
             <div class="options-row">
+                <!-- Checkbox "lembrar de mim" - ativa sistema de tokens seguros -->
                 <label class="checkbox-container">
                     <input type="checkbox" id="rememberMe">
                     Lembrar de mim
@@ -120,5 +159,28 @@
             to { transform: rotate(360deg); }
         }
     </style>
+
+    <!-- 
+    ================================================
+    SCRIPTS DE FUNCIONALIDADE
+    ================================================
+    -->
+    
+    <!-- Sistema completo de login com todas as funcionalidades -->
+    <script src="../assets/js/login.js"></script>
+    
+    <!-- 
+    CREDENCIAIS DE TESTE:
+    Admin: adm@email.com / 123456
+    Usuários: qualquer usuário registrado via /cadastro/cadastrar.html
+    
+    FUNCIONALIDADES ATIVAS:
+    ✅ Login dual (admin + banco)
+    ✅ "Lembrar de mim" com tokens seguros
+    ✅ Auto-login inteligente
+    ✅ Validação em tempo real
+    ✅ Toggle de senha
+    ✅ Detecção automática de ambiente
+    -->
 </body>
 </html>

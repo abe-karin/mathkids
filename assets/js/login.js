@@ -1,10 +1,24 @@
 // ================================================
 // SISTEMA DE LOGIN - PROJETO MATHKIDS
 // ================================================
+// Este arquivo implementa o sistema completo de autenticação
+// incluindo login dual (admin + usuários do banco), "lembrar de mim"
+// com tokens seguros, e auto-login inteligente.
+// 
+// Funcionalidades principais:
+// - Login de admin hardcoded (adm@email.com / 123456)
+// - Login de usuários registrados no banco PostgreSQL
+// - Sistema "lembrar de mim" com cookies seguros
+// - Auto-login baseado em tokens de autenticação
+// - Validação de formulários em tempo real
+// - Detecção automática de ambiente (dev/prod)
+// ================================================
 
 class LoginSystem {
     constructor() {
         // Detecta automaticamente o ambiente (similar ao app.js)
+        // Isso permite que o sistema funcione tanto em desenvolvimento
+        // (localhost:5000) quanto em produção (Render)
         this.apiBaseUrl = this.getApiBaseUrl();
         this.apiUrl = `${this.apiBaseUrl}/api/login`;
         console.log(`🔐 Login API configurada para: ${this.apiUrl}`);
@@ -13,60 +27,128 @@ class LoginSystem {
 
     /**
      * Detecta automaticamente a URL base da API baseada no ambiente
+     * @returns {string} URL base da API (localhost ou produção)
      */
     getApiBaseUrl() {
         const hostname = window.location.hostname;
         const protocol = window.location.protocol;
         
-        // Se estivermos em localhost, usar desenvolvimento local
+        // Ambiente de desenvolvimento local
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             return 'http://localhost:5000';
         }
         
-        // Se estivermos em produção (Render ou outro), usar URL de produção
+        // Ambiente de produção (Render ou similar)
         if (hostname.includes('onrender.com') || hostname.includes('mathkids')) {
             return 'https://mathkids-back.onrender.com';
         }
         
-        // Fallback: tentar usar a mesma origem do frontend
+        // Fallback: usar mesma origem com porta 5000
         return `${protocol}//${hostname}:5000`;
     }
 
+    /**
+     * Inicializa o sistema de login
+     * Configura event listeners, validação de formulários e verifica
+     * se há tokens de autenticação salvos para auto-login
+     */
     init() {
         document.addEventListener('DOMContentLoaded', () => {
             this.setupEventListeners();
             this.setupFormValidation();
+            this.checkSavedAuthentication(); // Verificar se há token salvo
             console.log('Sistema de login inicializado');
         });
     }
 
+    /**
+     * Verifica se há token de autenticação salvo para auto-login
+     * Esta função é chamada automaticamente ao carregar a página
+     * e permite que usuários com "lembrar de mim" ativado sejam
+     * automaticamente redirecionados para seus dashboards
+     * @returns {Promise<boolean>} true se auto-login foi realizado
+     */
+    async checkSavedAuthentication() {
+        try {
+            console.log('🔍 Verificando token de autenticação salvo...');
+            
+            // Fazer requisição para verificar token no servidor
+            const response = await fetch(`${this.apiBaseUrl}/api/verify-token`, {
+                method: 'GET',
+                credentials: 'include', // Importante: incluir cookies
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Token válido encontrado - fazendo auto-login');
+                
+                // Mostrar mensagem amigável de boas-vindas
+                this.showMessage(`Bem-vindo de volta, ${data.user.nome}!`, 'success');
+                
+                // Redirecionar após um breve delay para melhor UX
+                setTimeout(() => {
+                    if (data.user.tipo === 'admin') {
+                        window.location.href = '../admin-dashboard.html';
+                    } else {
+                        window.location.href = '../dashboard.html';
+                    }
+                }, 1500);
+                
+                return true;
+            } else {
+                console.log('ℹ️ Nenhum token válido encontrado - login manual necessário');
+                return false;
+            }
+        } catch (error) {
+            console.log('ℹ️ Verificação de token falhou - continuando com login manual');
+            return false;
+        }
+    }
+
+    /**
+     * Configura todos os event listeners da página de login
+     * Inclui submissão de formulário, toggle de senha, esqueci senha, etc.
+     */
     setupEventListeners() {
         const form = document.getElementById('loginForm');
         const togglePassword = document.getElementById('togglePassword');
         const forgotPasswordLink = document.getElementById('forgotPasswordLink');
         const googleLoginBtn = document.getElementById('googleLoginBtn');
 
+        // Event listener principal - submissão do formulário
         if (form) {
             form.addEventListener('submit', (e) => this.handleLogin(e));
         }
 
+        // Toggle para mostrar/esconder senha
         if (togglePassword) {
             togglePassword.addEventListener('click', () => this.togglePasswordVisibility());
         }
 
+        // Link "Esqueci minha senha" (funcionalidade futura)
         if (forgotPasswordLink) {
             forgotPasswordLink.addEventListener('click', (e) => this.handleForgotPassword(e));
         }
 
+        // Botão de login com Google (funcionalidade futura)
         if (googleLoginBtn) {
             googleLoginBtn.addEventListener('click', (e) => this.handleGoogleLogin(e));
         }
     }
 
+    /**
+     * Configura validação em tempo real dos campos do formulário
+     * Melhora a UX fornecendo feedback imediato ao usuário
+     */
     setupFormValidation() {
         const inputs = document.querySelectorAll('input[required]');
         inputs.forEach(input => {
+            // Validar quando o campo perde o foco
             input.addEventListener('blur', () => this.validateField(input));
+            // Limpar erros enquanto o usuário digita
             input.addEventListener('input', () => this.clearFieldError(input));
         });
     }
@@ -186,6 +268,7 @@ class LoginSystem {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                 },
+                credentials: 'include', // Incluir cookies
                 mode: 'cors',
                 body: JSON.stringify({
                     email: email,
@@ -274,11 +357,20 @@ class LoginSystem {
 
         if (rememberMe) {
             localStorage.setItem('mathkids_admin', JSON.stringify(adminData));
+            
+            // Definir cookie simples para "lembrar de mim" do admin
+            document.cookie = `mathkids_admin_remember=true; max-age=${30 * 24 * 60 * 60}; path=/; SameSite=Lax`;
+            console.log('🍪 Cookie "lembrar de mim" definido para admin');
         } else {
             sessionStorage.setItem('mathkids_admin', JSON.stringify(adminData));
         }
 
-        this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
+        let message = 'Login realizado com sucesso!';
+        if (rememberMe) {
+            message += ' Você será lembrado neste dispositivo.';
+        }
+
+        this.showMessage(message + ' Redirecionando...', 'success');
         
         // Redirecionar para página de admin após 1.5 segundos
         setTimeout(() => {
@@ -296,7 +388,9 @@ class LoginSystem {
             nome: data.user.nome,
             tipo: data.user.tipo || 'usuario',
             token: data.token,
-            loginTime: new Date().toISOString()
+            loginTime: new Date().toISOString(),
+            rememberMe: rememberMe,
+            authTokenSet: data.authTokenSet
         };
 
         if (rememberMe) {
@@ -305,7 +399,12 @@ class LoginSystem {
             sessionStorage.setItem('mathkids_user', JSON.stringify(userData));
         }
 
-        this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
+        let message = 'Login realizado com sucesso!';
+        if (data.authTokenSet) {
+            message += ' Você será lembrado neste dispositivo.';
+        }
+        
+        this.showMessage(message + ' Redirecionando...', 'success');
         
         // Redirecionar baseado no tipo de usuário
         setTimeout(() => {
@@ -317,14 +416,208 @@ class LoginSystem {
         }, 1500);
     }
 
+    /**
+     * Função de logout que limpa token do servidor
+     */
+    async logout() {
+        try {
+            await fetch(`${this.apiBaseUrl}/api/logout`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+            
+            // Limpar storage local
+            localStorage.removeItem('mathkids_user');
+            localStorage.removeItem('mathkids_admin');
+            sessionStorage.removeItem('mathkids_user');
+            sessionStorage.removeItem('mathkids_admin');
+            
+            console.log('👋 Logout completo realizado');
+            
+        } catch (error) {
+            console.error('Erro no logout:', error);
+        }
+    }
+
     handleLoginError(data) {
         const message = data.message || 'Erro no login. Verifique suas credenciais.';
         this.showMessage(message, 'error');
     }
 
+    /**
+     * Gerencia funcionalidade "Esqueci minha senha"
+     * Abre modal para inserir email e solicita reset via API
+     * @param {Event} event - Evento do clique
+     */
     handleForgotPassword(event) {
         event.preventDefault();
-        alert('Funcionalidade de recuperação de senha em desenvolvimento.');
+        this.showForgotPasswordModal();
+    }
+
+    /**
+     * Exibe modal de recuperação de senha
+     */
+    showForgotPasswordModal() {
+        // Criar modal dinamicamente
+        const modal = document.createElement('div');
+        modal.className = 'forgot-password-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-key"></i> Recuperar Senha</h3>
+                    <button class="close-modal" aria-label="Fechar">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Digite seu email para receber instruções de recuperação:</p>
+                    <form id="forgotPasswordForm">
+                        <input type="email" id="forgotEmail" placeholder="Seu email" required>
+                        <div class="modal-buttons">
+                            <button type="button" class="btn secondary-btn" id="cancelForgot">Cancelar</button>
+                            <button type="submit" class="btn primary-btn" id="sendReset">Enviar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        // Adicionar ao DOM
+        document.body.appendChild(modal);
+
+        // Event listeners do modal
+        const closeBtn = modal.querySelector('.close-modal');
+        const cancelBtn = modal.querySelector('#cancelForgot');
+        const form = modal.querySelector('#forgotPasswordForm');
+
+        const closeModal = () => {
+            modal.remove();
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        form.addEventListener('submit', (e) => this.handleForgotPasswordSubmit(e, modal));
+
+        // Focar no campo de email
+        setTimeout(() => {
+            modal.querySelector('#forgotEmail').focus();
+        }, 100);
+    }
+
+    /**
+     * Processa envio do formulário de recuperação de senha
+     * @param {Event} event - Evento de submit
+     * @param {Element} modal - Elemento do modal
+     */
+    async handleForgotPasswordSubmit(event, modal) {
+        event.preventDefault();
+        
+        const email = modal.querySelector('#forgotEmail').value.trim();
+        const submitBtn = modal.querySelector('#sendReset');
+        
+        if (!email) {
+            this.showModalMessage(modal, 'Por favor, digite seu email', 'error');
+            return;
+        }
+
+        // Validar formato do email
+        if (!this.isValidEmail(email)) {
+            this.showModalMessage(modal, 'Formato de email inválido', 'error');
+            return;
+        }
+
+        // Mostrar loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+        try {
+            console.log(`🔑 Solicitando reset de senha para: ${email}`);
+            
+            const response = await fetch(`${this.apiBaseUrl}/api/forgot-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log('✅ Solicitação de reset enviada');
+                
+                // Mostrar mensagem de sucesso
+                this.showModalMessage(modal, data.message, 'success');
+                
+                // Se estiver em desenvolvimento e houver link, mostrar
+                if (data.devResetLink) {
+                    const devMessage = `\n\n📧 Link de desenvolvimento:\n${data.devResetLink}`;
+                    console.log(devMessage);
+                    
+                    // Adicionar botão para copiar link (desenvolvimento)
+                    const devDiv = document.createElement('div');
+                    devDiv.className = 'dev-reset-link';
+                    devDiv.innerHTML = `
+                        <hr>
+                        <p><strong>🔧 Modo Desenvolvimento:</strong></p>
+                        <p>Link de reset gerado:</p>
+                        <input type="text" value="${data.devResetLink}" readonly class="dev-link-input">
+                        <button type="button" class="btn secondary-btn" onclick="navigator.clipboard.writeText('${data.devResetLink}'); this.textContent='Copiado!'">
+                            <i class="fas fa-copy"></i> Copiar Link
+                        </button>
+                    `;
+                    modal.querySelector('.modal-body').appendChild(devDiv);
+                }
+                
+                // Fechar modal após 5 segundos ou no clique
+                setTimeout(() => {
+                    if (document.body.contains(modal)) {
+                        modal.remove();
+                    }
+                }, 5000);
+                
+            } else {
+                this.showModalMessage(modal, data.message || 'Erro ao enviar solicitação', 'error');
+            }
+
+        } catch (error) {
+            console.error('❌ Erro na solicitação de reset:', error);
+            this.showModalMessage(modal, 'Erro de conexão. Tente novamente.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Enviar';
+        }
+    }
+
+    /**
+     * Exibe mensagem dentro do modal
+     * @param {Element} modal - Elemento do modal
+     * @param {string} message - Mensagem a exibir
+     * @param {string} type - Tipo da mensagem (success, error, info)
+     */
+    showModalMessage(modal, message, type = 'info') {
+        // Remover mensagem anterior
+        const existingMessage = modal.querySelector('.modal-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+
+        // Criar nova mensagem
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `modal-message ${type}`;
+        messageDiv.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            ${message}
+        `;
+
+        // Inserir no modal
+        const modalBody = modal.querySelector('.modal-body');
+        modalBody.insertBefore(messageDiv, modalBody.firstChild);
     }
 
     handleGoogleLogin(event) {

@@ -1,35 +1,219 @@
-# Dependências
+# ================================================
+# GITIGNORE - MATHKIDS BACKEND
+# ================================================
+# Arquivo para proteger credenciais e dados sensíveis
+# ================================================
+
+# =====================================
+# CREDENCIAIS E CONFIGURAÇÕES SENSÍVEIS
+# =====================================
+# Arquivos de ambiente (contêm informações sensíveis)
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.*-template
+
+# Arquivos de configuração com credenciais
+config/production.json
+config/development.json
+config/local.json
+secrets.json
+credentials.json
+
+# Chaves de API e certificados
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+api-keys.txt
+secrets.txt
+
+# ATENÇÃO: Nunca commitar credenciais hardcoded!
+# Sempre usar variáveis de ambiente (.env)
+
+# Configurações específicas de email
+email-config.json
+smtp-config.json
+mailgun-config.json
+mailtrap-config.json
+
+# Debug específico do MathKids
+debug-*.json
+reset-tokens-*.json
+user-sessions.json
+email-debug.log
+
+# =====================================
+# DEPENDÊNCIAS E CACHE
+# =====================================
+# Dependências do Node.js
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Arquivos de ambiente (contêm informações sensíveis)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Runtime e PM2
+.pm2/
+ecosystem.config.js
+process.json
 
-# Logs
-logs
+# Cache do npm e yarn
+.npm/
+.yarn/
+.pnp.*
+
+# =====================================
+# LOGS E ARQUIVOS TEMPORÁRIOS
+# =====================================
+# Logs de aplicação
+logs/
 *.log
+*.log.*
+log-*.txt
 
-# Cache e arquivos temporários
+# Arquivos temporários
 .cache/
 .temp/
 .tmp/
+temp/
+tmp/
 
-# Arquivos do sistema operacional
+# =====================================
+# BANCO DE DADOS
+# =====================================
+# Dumps e backups de banco
+*.sql
+*.dump
+*.backup
+database.sqlite
+database.db
+*.db3
+
+# Migrations locais (se houver)
+migrations/local/
+seeds/local/
+
+# =====================================
+# ARQUIVOS DO SISTEMA
+# =====================================
+# MacOS
 .DS_Store
-Thumbs.db
+.AppleDouble
+.LSOverride
+Icon?
 
-# IDEs
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# =====================================
+# IDEs E EDITORES
+# =====================================
+# Visual Studio Code
 .vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains IDEs
 .idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
 *.swp
 *.swo
+*~
 
+# Emacs
+\#*\#
+.\#*
+
+# =====================================
+# BUILD E DEPLOY
+# =====================================
 # Arquivos de build
 dist/
 build/
+out/
+target/
+
+# Arquivos de deploy
+.deploy/
+deploy.sh
+deployment-config.json
+
+# Docker (se houver)
+.dockerignore
+docker-compose.override.yml
+
+# =====================================
+# TESTES E COVERAGE
+# =====================================
+# Coverage reports
+coverage/
+.nyc_output/
+.coverage/
+*.lcov
+
+# Test results
+test-results/
+junit.xml
+
+# =====================================
+# ARQUIVOS ESPECÍFICOS DO PROJETO
+# =====================================
+# Uploads de usuário (se houver)
+uploads/
+user-files/
+attachments/
+
+# Documentação gerada
+docs/generated/
+api-docs/generated/
+
+# Configurações locais específicas
+local-config.json
+dev-settings.json
+
+# Dados de teste e desenvolvimento
+test-data/
+sample-data.json
+dev-users.json
+
+# =====================================
+# SEGURANÇA ADICIONAL
+# =====================================
+# Evitar commit acidental de backups
+*.bak
+*.backup
+*.old
+*.orig
+
+# Evitar commit de arquivos compactados com dados
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Arquivos que podem conter dados sensíveis
+debug.log
+error.log
+access.log
+audit.log

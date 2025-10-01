@@ -1,0 +1,147 @@
+# ================================================
+# GITIGNORE - MATHKIDS PROJECT (ROOT)
+# ================================================
+# Proteção para todo o projeto MathKids
+# ================================================
+
+# =====================================
+# CREDENCIAIS E CONFIGURAÇÕES SENSÍVEIS
+# =====================================
+# Arquivos de ambiente
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.*-template
+
+# Configurações com credenciais
+**/config/production.json
+**/config/development.json
+**/config/local.json
+**/secrets.json
+**/credentials.json
+
+# Chaves de API
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+**/api-keys.txt
+**/secrets.txt
+
+# =====================================
+# BACKEND ESPECÍFICO
+# =====================================
+# Node.js
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/package-lock.json
+
+# Logs do servidor
+**/logs/
+**/*.log
+**/error.log
+**/access.log
+
+# Banco de dados
+**/*.sql
+**/*.dump
+**/*.backup
+**/*.db
+**/*.sqlite
+
+# =====================================
+# FRONTEND ESPECÍFICO
+# =====================================
+# Cache de browsers
+**/browser-cache/
+**/.cache/
+
+# Arquivos compilados
+**/dist/
+**/build/
+**/assets/compiled/
+
+# Source maps (podem conter código fonte)
+**/*.map
+
+# =====================================
+# DOCUMENTAÇÃO SENSÍVEL
+# =====================================
+# Documentos que podem conter credenciais
+CREDENTIALS.md
+SECRETS.md
+API_KEYS.md
+PASSWORDS.md
+CONFIG_GUIDE.md
+
+# Arquivos de configuração específicos
+MAILGUN_*.md
+MAILTRAP_*.md
+DATABASE_*.md
+EMAIL_*.md
+
+# Documentação específica do desenvolvimento
+DEV_NOTES.md
+SETUP_LOCAL.md
+PRODUCTION_DEPLOY.md
+
+# =====================================
+# ARQUIVOS DO SISTEMA
+# =====================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# =====================================
+# IDEs E EDITORES
+# =====================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+**/*.swp
+**/*.swo
+
+# =====================================
+# SEGURANÇA ADICIONAL
+# =====================================
+# Backups que podem conter dados sensíveis
+**/*.bak
+**/*.backup
+**/*.old
+
+# Arquivos temporários
+**/temp/
+**/tmp/
+**/.temp/
+**/.tmp/
+
+# Uploads de usuário
+**/uploads/
+**/user-files/
+
+# =====================================
+# PROJETO ESPECÍFICO
+# =====================================
+# Configurações locais do MathKids
+mathkids-config.json
+local-settings.json
+dev-config.json
+
+# Dados de teste que podem conter informações reais
+test-data.json
+sample-users.json
+demo-database.sql
