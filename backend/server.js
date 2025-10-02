@@ -703,8 +703,8 @@ app.post('/api/forgot-password', async (req, res) => {
                 // Em desenvolvimento, sempre use localhost:3000
                 baseUrl = 'http://localhost:3000';
             } else {
-                // Em produção, use variável de ambiente ou host da requisição
-                baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+                // Em produção, usar URL do frontend (nunca do backend)
+                baseUrl = process.env.FRONTEND_URL || 'https://mathkids-3sz0.onrender.com';
             }
             
             const resetLink = `${baseUrl}/cadastro/reset-password.html?token=${resetToken}&email=${encodeURIComponent(email)}`;
