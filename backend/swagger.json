@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "MathKids API",
-    "description": "API do MathKids - Aplicativo de ensino de matemática para crianças de 3 a 9 anos.\n\nEsta API gerencia o sistema completo de autenticação de responsáveis, incluindo registro, login e redefinição de senhas.\n\n## ✅ Funcionalidades Implementadas\n- 👥 Registro de responsáveis/pais\n- 🔑 Sistema de login com tokens persistentes\n- 🔐 Redefinição de senha via email (Mailtrap)\n- 📧 Serviço de email integrado com fallback\n- 🛡️ Validação robusta e segurança avançada\n- 💾 PostgreSQL com tokens de autenticação\n- 🔍 Health checks para monitoramento\n\n## 🚀 Funcionalidades Futuras\n- 👶 Gestão de perfis de crianças\n- 🧮 Módulos educativos de matemática\n- 🏆 Sistema de progresso e recompensas\n- 📊 Relatórios de aprendizado\n\n## 📧 Sistema de Email\n- **Mailtrap**: Desenvolvimento e testes\n- **Ethereal**: Fallback automático\n- **Tokens seguros**: 64 chars hex, expiração automática\n- **Templates responsivos**: HTML + texto\n\n## 🔐 Segurança\n- Senhas hasheadas com bcrypt (10 rounds)\n- Tokens JWT para sessões persistentes\n- Rate limiting no Mailtrap\n- Validação em múltiplas camadas\n- Logout automático em reset de senha\n\n## 🧪 Como testar\n1. Acesse https://editor.swagger.io/\n2. Importe este arquivo JSON\n3. Use 'Try it out' para testar os endpoints\n4. Para reset: use `/api/forgot-password` → copie link do devInfo → teste `/api/reset-password`",
-    "version": "2.0.0",
+    "description": "API REST completa do MathKids - Plataforma educativa de matemática para crianças de 3 a 9 anos.\n\nSistema robusto de autenticação, gestão de usuários e recuperação de senhas com segurança avançada.\n\n## ✅ Funcionalidades Implementadas\n- 👥 **Registro de responsáveis/pais** com validação completa\n- 🔑 **Sistema de login seguro** com tokens persistentes ('Lembrar de mim')\n- 🔐 **Redefinição de senha via email** com tokens criptografados\n- 📧 **Serviço de email robusto** (Mailtrap + Ethereal fallback)\n- 🛡️ **Validação rigorosa** e segurança em múltiplas camadas\n- 💾 **PostgreSQL** via Neon.tech com tokens de autenticação\n- 🔍 **Health checks completos** para monitoramento\n- 🚪 **Logout seguro** com revogação de sessões\n- 🔎 **Endpoints de debug** para desenvolvimento\n\n## 🚀 Funcionalidades Futuras\n- 👶 Gestão de perfis de crianças\n- 🧮 Módulos educativos de matemática interativos\n- 🏆 Sistema de progresso e recompensas\n- 📊 Relatórios de aprendizado para pais\n\n## 📧 Sistema de Email\n- **Mailtrap**: Desenvolvimento e produção\n- **Ethereal**: Fallback automático quando Mailtrap falha\n- **Tokens seguros**: 64 chars hex com expiração automática\n- **Templates HTML**: Responsivos e acessíveis\n- **Expiração dinâmica**: 60min (dev) / 15min (prod)\n\n## 🔐 Segurança Avançada\n- **bcrypt**: Senhas hasheadas com salt de 10 rounds\n- **Tokens JWT**: Sessões persistentes seguras\n- **CORS**: Origens específicas permitidas\n- **Validação rigorosa**: Sanitização de todos os inputs\n- **Case-insensitive**: Busca por email normalizada\n- **Logs detalhados**: Monitoramento sem expor dados sensíveis\n\n## 🧪 Como Testar\n1. **Swagger UI**: Acesse esta documentação interativa\n2. **Try it out**: Use os botões para testar diretamente\n3. **Reset de senha**: Execute `/api/forgot-password` → copie token do `devInfo` → teste `/api/reset-password`\n4. **Health checks**: Verifique `/health`, `/health/database`, `/health/email`\n5. **Debug**: Use endpoints `/debug` em desenvolvimento",
+    "version": "2.2.0",
     "contact": {
       "name": "MathKids Team",
       "url": "https://github.com/abe-karin/mathkids",
@@ -40,6 +40,10 @@
     {
       "name": "Páginas",
       "description": "Rotas para servir páginas HTML do frontend"
+    },
+    {
+      "name": "Debug",
+      "description": "Endpoints de debugging e diagnóstico (desenvolvimento apenas)"
     },
     {
       "name": "Educativo",
@@ -771,6 +775,272 @@
           }
         }
       }
+    },
+    "/api/logout": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "🚪 Logout seguro do usuário",
+        "description": "Realiza logout seguro invalidando tokens de autenticação e sessões ativas.\n\n### ✅ Funcionalidades:\n- 🗑️ Invalida token JWT atual\n- 🔄 Remove cookie de 'lembrar de mim'\n- 🛡️ Revoga sessões ativas\n- 📱 Logout em todos os dispositivos\n\n### 🔐 Segurança:\n- Token invalidado instantaneamente\n- Limpeza completa de sessões\n- Sem exposição de dados sensíveis",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "Token JWT para invalidar (opcional)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "✅ Logout realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Logout realizado com sucesso"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/verify-token": {
+      "get": {
+        "tags": ["Autenticação"],
+        "summary": "🔍 Verificar token salvo",
+        "description": "Verifica se existe token válido salvo (funcionalidade 'Lembrar de mim').\n\n### ✅ Funcionalidades:\n- 🔍 Verifica cookie de sessão\n- ⏰ Valida expiração do token\n- 👤 Retorna dados do usuário se válido\n- 🔄 Auto-login silencioso\n\n### 🛡️ Segurança:\n- Verificação de integridade do token\n- Validação de expiração\n- Não expõe dados sensíveis",
+        "responses": {
+          "200": {
+            "description": "✅ Token válido encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 123
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "usuario@example.com"
+                        },
+                        "nome": {
+                          "type": "string",
+                          "example": "João Silva"
+                        },
+                        "tipo": {
+                          "type": "string",
+                          "example": "usuario"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "❌ Token inválido ou expirado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/debug": {
+      "get": {
+        "tags": ["Debug"],
+        "summary": "🔧 Informações de debug do sistema",
+        "description": "⚠️ **DESENVOLVIMENTO APENAS** - Retorna informações técnicas do sistema.\n\n### 📊 Informações incluídas:\n- 🌐 URLs e configurações\n- 📧 Status do serviço de email\n- 💾 Conexão com banco de dados\n- ⚙️ Variáveis de ambiente (sem dados sensíveis)\n- 🔍 Estatísticas do servidor\n\n### ⚠️ Importante:\n- Disponível apenas em desenvolvimento\n- Não expõe credenciais\n- Dados sanitizados para segurança",
+        "responses": {
+          "200": {
+            "description": "✅ Informações de debug coletadas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "environment": {
+                      "type": "string",
+                      "example": "development"
+                    },
+                    "database": {
+                      "type": "object",
+                      "properties": {
+                        "connected": {
+                          "type": "boolean"
+                        },
+                        "url_configured": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "email": {
+                      "type": "object",
+                      "properties": {
+                        "service": {
+                          "type": "string",
+                          "example": "mailtrap"
+                        },
+                        "configured": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "❌ Não disponível em produção"
+          }
+        }
+      }
+    },
+    "/api/debug/users": {
+      "get": {
+        "tags": ["Debug"],
+        "summary": "👥 Listar usuários (Debug)",
+        "description": "⚠️ **DESENVOLVIMENTO APENAS** - Lista usuários cadastrados.\n\n### 📋 Funcionalidades:\n- 📊 Lista todos os usuários\n- 🔒 Senhas são omitidas\n- 📅 Dados de criação e modificação\n- 🔍 Estatísticas básicas\n\n### ⚠️ Segurança:\n- Disponível apenas em desenvolvimento\n- Senhas nunca expostas\n- Dados sensíveis sanitizados",
+        "responses": {
+          "200": {
+            "description": "✅ Lista de usuários",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "nome_responsavel": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "❌ Não disponível em produção"
+          }
+        }
+      }
+    },
+    "/api/debug/reset-tokens/{email}": {
+      "get": {
+        "tags": ["Debug"],
+        "summary": "🔐 Tokens de reset por email (Debug)",
+        "description": "⚠️ **DESENVOLVIMENTO APENAS** - Lista tokens de reset para um email.\n\n### 🔍 Informações incluídas:\n- 📋 Todos os tokens para o email\n- ⏰ Status de expiração\n- 🔄 Tokens usados vs ativos\n- 📅 Datas de criação\n\n### ⚠️ Segurança:\n- Hash dos tokens (não tokens reais)\n- Disponível apenas em desenvolvimento\n- Logs de acesso registrados",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email do usuário para buscar tokens"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "✅ Tokens encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string"
+                    },
+                    "tokens": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "token_hash": {
+                            "type": "string",
+                            "description": "Hash do token (não o token real)"
+                          },
+                          "expires_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "used": {
+                            "type": "boolean"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "❌ Não disponível em produção"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1033,7 +1303,90 @@
             "type": "string",
             "format": "email",
             "description": "Email do usuário que esqueceu a senha",
-            "example": "usuario@email.com"
+            "example": "maria.santos@email.com"
+          }
+        }
+      },
+      "DebugResponse": {
+        "type": "object",
+        "properties": {
+          "environment": {
+            "type": "string",
+            "description": "Ambiente atual (development/production)",
+            "example": "development"
+          },
+          "database": {
+            "type": "object",
+            "description": "Informações de conexão do banco",
+            "properties": {
+              "host": {
+                "type": "string",
+                "example": "ep-dry-lab-a1b2c3d4.us-east-1.aws.neon.tech"
+              },
+              "port": {
+                "type": "string",
+                "example": "5432"
+              },
+              "database": {
+                "type": "string",
+                "example": "mathkids_db"
+              },
+              "ssl": {
+                "type": "boolean",
+                "example": true
+              }
+            }
+          },
+          "email": {
+            "type": "object",
+            "description": "Configurações do serviço de email",
+            "properties": {
+              "primary": {
+                "type": "string",
+                "example": "mailtrap"
+              },
+              "fallback": {
+                "type": "string",
+                "example": "ethereal"
+              }
+            }
+          },
+          "users": {
+            "type": "array",
+            "description": "Lista de usuários (apenas em development)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "nome_responsavel": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "resetTokens": {
+            "type": "array",
+            "description": "Tokens de reset ativos (apenas em development)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "expires_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
           }
         }
       },
@@ -1296,7 +1649,7 @@
   },
   "security": [],
   "externalDocs": {
-    "description": "📚 Documentação completa do MathKids no GitHub",
+    "description": "📚 Documentação completa do MathKids no GitHub\n\n🚀 **Início Rápido**\n1. Clone o repositório\n2. Configure as variáveis de ambiente (.env)\n3. Execute `npm install && npm start`\n4. Acesse /api-docs para esta documentação\n\n🔧 **Configuração de Desenvolvimento**\n- PostgreSQL via Neon.tech (DATABASE_URL)\n- Mailtrap para emails (MAILTRAP_USERNAME/PASSWORD)\n- NODE_ENV=development para logs detalhados\n\n📧 **Testando Emails**\n- Use /api/forgot-password → copie token do devInfo\n- Execute /api/reset-password com o token\n- Logs detalhados em desenvolvimento\n\n🛡️ **Segurança**\n- Senhas hasheadas com bcrypt (10 rounds)\n- Tokens de 64 chars hex para reset\n- Validação rigorosa em todas as entradas\n- CORS configurado para origens específicas\n\n📊 **Monitoramento**\n- /health → Status geral da API\n- /health/database → Conectividade do banco\n- /health/email → Status do serviço de email\n- /debug → Informações detalhadas (apenas dev)\n\n🎯 **Próximos Passos**\n- Implementar módulos educativos de matemática\n- Adicionar gestão de perfis de crianças\n- Sistema de progresso e recompensas\n- Relatórios de aprendizado para pais",
     "url": "https://github.com/abe-karin/mathkids/blob/main/README.md"
   }
 }

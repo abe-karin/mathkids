@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - MathKids</title>
+    <title>Dashboard - MathKids</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐉</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="favicon.ico">
+    
     <link rel="stylesheet" href="assets/css/shared.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -34,7 +39,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        .admin-container {
+        .dashboard-container {
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
@@ -46,7 +51,7 @@
             overflow: hidden;
         }
 
-        .admin-container::before {
+        .dashboard-container::before {
             content: '';
             position: absolute;
             top: 0;
@@ -56,11 +61,11 @@
             background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
         }
 
-        .admin-header {
+        .dashboard-header {
             margin-bottom: 30px;
         }
 
-        .admin-icon {
+        .user-icon {
             font-size: 4rem;
             color: var(--primary-green);
             margin-bottom: 20px;
@@ -129,80 +134,64 @@
             font-weight: 500;
         }
 
-        .admin-actions {
+        .coming-soon {
+            background: linear-gradient(135deg, var(--light-green), #f0f8f5);
+            border: 2px dashed var(--primary-green);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 20px 0;
+            color: var(--text-dark);
+        }
+
+        .coming-soon h3 {
+            margin: 0 0 15px 0;
+            color: var(--secondary-green);
+            font-size: 1.5rem;
+        }
+
+        .coming-soon p {
+            margin: 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin: 30px 0;
+            margin: 20px 0;
         }
 
-        .action-btn {
-            background: linear-gradient(135deg, 
-                var(--primary-green) 0%, 
-                var(--secondary-green) 50%, 
-                var(--accent-green) 100%);
-            background-size: 200% 200%;
-            animation: buttonGradient 3s ease infinite;
-            color: var(--white);
-            border: none;
-            padding: 15px 20px;
+        .feature-card {
+            background: var(--light-green);
             border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
             transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        @keyframes buttonGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .action-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.3), 
-                transparent);
-            transition: left 0.5s ease;
-        }
-
-        .action-btn:hover::before {
-            left: 100%;
-        }
-
-        .action-btn:hover {
+        .feature-card:hover {
+            border-color: var(--primary-green);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            background-size: 150% 150%;
+            box-shadow: var(--shadow);
         }
 
-        .action-btn.secondary {
-            background: linear-gradient(135deg, 
-                var(--secondary-green) 0%, 
-                #4a9a7e 50%, 
-                var(--primary-green) 100%);
-            background-size: 200% 200%;
-            animation: buttonGradient 3s ease infinite reverse;
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary-green);
+            margin-bottom: 10px;
         }
 
-        .action-btn.secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            background-size: 150% 150%;
+        .feature-title {
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
         }
 
         .logout-btn {
@@ -279,7 +268,7 @@
         }
 
         @media (max-width: 768px) {
-            .admin-container {
+            .dashboard-container {
                 padding: 20px;
                 margin: 20px;
             }
@@ -288,34 +277,38 @@
                 font-size: 2rem;
             }
 
-            .admin-actions {
+            .features-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="admin-header">
-            <div class="admin-icon">
-                <i class="fas fa-user-shield"></i>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="user-icon">
+                <i class="fas fa-user-circle"></i>
             </div>
             <h1 class="welcome-title">Usuário Logado</h1>
             <p class="welcome-subtitle">
                 <span class="status-indicator"></span>
-                Acesso autorizado como Administrador
+                Bem-vindo ao MathKids!
             </p>
         </div>
 
         <div class="user-info">
-            <h3><i class="fas fa-info-circle"></i> Informações da Sessão</h3>
+            <h3><i class="fas fa-info-circle"></i> Informações do Usuário</h3>
             <div class="info-item">
-                <span class="info-label">Email:</span>
-                <span class="info-value" id="userEmail">adm@email.com</span>
+                <span class="info-label">Nome:</span>
+                <span class="info-value" id="userName">Carregando...</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Tipo de Usuário:</span>
-                <span class="info-value" id="userType">Administrador</span>
+                <span class="info-label">Email:</span>
+                <span class="info-value" id="userEmail">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tipo de Conta:</span>
+                <span class="info-value" id="userType">Usuário</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Login em:</span>
@@ -325,28 +318,50 @@
                 <span class="info-label">Status:</span>
                 <span class="info-value">
                     <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                    Conectado
+                    Online e Autenticado
                 </span>
             </div>
         </div>
 
-        <div class="admin-actions">
-            <button class="action-btn" onclick="viewUsers()">
-                <i class="fas fa-users"></i>
-                Ver Usuários
-            </button>
-            <button class="action-btn" onclick="viewReports()">
-                <i class="fas fa-chart-bar"></i>
-                Relatórios
-            </button>
-            <button class="action-btn" onclick="viewSettings()">
-                <i class="fas fa-cog"></i>
-                Configurações
-            </button>
-            <button class="action-btn secondary" onclick="viewLogs()">
-                <i class="fas fa-file-alt"></i>
-                Logs do Sistema
-            </button>
+        <div class="coming-soon">
+            <h3><i class="fas fa-magic"></i> Recursos em Desenvolvimento</h3>
+            <p>🎮 Os módulos educativos de matemática estão sendo desenvolvidos para oferecer uma experiência mágica de aprendizado!</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="feature-title">Matemática Básica</div>
+                    <div class="feature-description">Contagem, soma e subtração para crianças de 3-9 anos</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="feature-title">Jogos Educativos</div>
+                    <div class="feature-description">Atividades interativas com nosso dragão mascote</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="feature-title">Sistema de Recompensas</div>
+                    <div class="feature-description">Conquistas e medalhas por progresso</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="feature-title">Acompanhamento</div>
+                    <div class="feature-description">Relatórios de progresso para pais</div>
+                </div>
+            </div>
+            
+            <p><strong>🚀 Previsão de lançamento:</strong> Primeiro módulo em desenvolvimento!</p>
         </div>
 
         <button class="logout-btn" onclick="logout()">
@@ -360,82 +375,55 @@
     <script>
         // Verificar se o usuário está logado
         function checkAuth() {
-            const adminData = localStorage.getItem('mathkids_admin') || sessionStorage.getItem('mathkids_admin');
             const userData = localStorage.getItem('mathkids_user') || sessionStorage.getItem('mathkids_user');
             
-            // Verificar se é admin específico ou usuário com tipo admin
-            let currentUser = null;
-            
-            if (adminData) {
-                currentUser = JSON.parse(adminData);
-            } else if (userData) {
-                const user = JSON.parse(userData);
-                if (user.tipo === 'admin') {
-                    currentUser = user;
-                }
-            }
-            
-            if (!currentUser) {
-                alert('Acesso negado. Apenas administradores podem acessar esta página.');
+            if (!userData) {
+                alert('Acesso negado. Faça login primeiro.');
                 window.location.href = 'cadastro/entrar.html';
                 return;
             }
 
             try {
-                // Exibir informações do admin
-                document.getElementById('userEmail').textContent = currentUser.email;
+                const user = JSON.parse(userData);
+                
+                // Exibir informações do usuário
+                document.getElementById('userName').textContent = user.nome || 'Usuário';
+                document.getElementById('userEmail').textContent = user.email || 'N/A';
                 document.getElementById('userType').textContent = 
-                    currentUser.tipo === 'admin' ? 'Administrador' : 'Administrador do Sistema';
+                    user.tipo === 'admin' ? 'Administrador' : 'Usuário Registrado';
                 
                 // Formatar data de login
-                if (currentUser.loginTime) {
-                    const loginDate = new Date(currentUser.loginTime);
+                if (user.loginTime) {
+                    const loginDate = new Date(user.loginTime);
                     document.getElementById('loginTime').textContent = loginDate.toLocaleString('pt-BR');
                 } else {
                     document.getElementById('loginTime').textContent = 'Sessão atual';
                 }
-                
-                // Mostrar informação adicional se for admin do banco
-                if (currentUser.id && currentUser.nome) {
-                    document.getElementById('userType').textContent = 'Admin Registrado no Sistema';
-                    
-                    // Adicionar informação de nome se disponível
-                    const nameInfo = document.createElement('div');
-                    nameInfo.className = 'info-item';
-                    nameInfo.innerHTML = `
-                        <span class="info-label">Nome:</span>
-                        <span class="info-value">${currentUser.nome}</span>
+
+                // Se for admin que chegou aqui por engano, oferecer redirecionamento
+                if (user.tipo === 'admin') {
+                    const adminRedirect = document.createElement('div');
+                    adminRedirect.innerHTML = `
+                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: center;">
+                            <i class="fas fa-crown" style="color: #f39c12;"></i>
+                            <strong>Acesso de Administrador Detectado!</strong><br>
+                            <button onclick="window.location.href='admin-dashboard.html'" 
+                                    style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-top: 10px; cursor: pointer;">
+                                Ir para Dashboard Admin
+                            </button>
+                        </div>
                     `;
-                    document.getElementById('userEmail').closest('.info-item').after(nameInfo);
+                    document.querySelector('.user-info').after(adminRedirect);
                 }
-                
+
             } catch (error) {
-                console.error('Erro ao carregar dados do administrador:', error);
-                // Em caso de erro, limpar dados e redirecionar
-                localStorage.removeItem('mathkids_admin');
-                sessionStorage.removeItem('mathkids_admin');
+                console.error('Erro ao carregar dados do usuário:', error);
+                // Em caso de erro, limpar dados corrompidos e redirecionar
                 localStorage.removeItem('mathkids_user');
                 sessionStorage.removeItem('mathkids_user');
                 alert('Sessão inválida. Faça login novamente.');
                 window.location.href = 'cadastro/entrar.html';
             }
-        }
-
-        // Funções dos botões de ação
-        function viewUsers() {
-            alert('Funcionalidade "Ver Usuários" em desenvolvimento.\n\nEsta área permitirá visualizar todos os usuários cadastrados no sistema.');
-        }
-
-        function viewReports() {
-            alert('Funcionalidade "Relatórios" em desenvolvimento.\n\nAqui você poderá ver estatísticas de uso, progresso das crianças e outros relatórios.');
-        }
-
-        function viewSettings() {
-            alert('Funcionalidade "Configurações" em desenvolvimento.\n\nEsta seção permitirá configurar parâmetros do sistema.');
-        }
-
-        function viewLogs() {
-            alert('Funcionalidade "Logs do Sistema" em desenvolvimento.\n\nAqui você poderá visualizar logs de atividade e erros do sistema.');
         }
 
         // Função de logout
@@ -456,11 +444,11 @@
                     console.error('Erro ao fazer logout no servidor:', error);
                 }
                 
-                // Limpar todos os dados de sessão
-                localStorage.removeItem('mathkids_admin');
-                sessionStorage.removeItem('mathkids_admin');
+                // Limpar dados de sessão locais
                 localStorage.removeItem('mathkids_user');
+                localStorage.removeItem('mathkids_admin');
                 sessionStorage.removeItem('mathkids_user');
+                sessionStorage.removeItem('mathkids_admin');
                 
                 // Redirecionar para página de login
                 alert('Logout realizado com sucesso!');

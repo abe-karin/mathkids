@@ -114,20 +114,29 @@ const allowedOrigins = [
     'http://localhost:5000',    // Servidor backend
     'http://127.0.0.1:5000',   // Alternativa localhost
     'http://localhost:8080',    // Servidor frontend comum
-    'http://localhost:3000',    // Porta alternativa comum
+    'http://localhost:3000',    // Porta principal do frontend
+    'http://127.0.0.1:3000',   // Frontend via 127.0.0.1
+    'http://localhost:3001',    // Porta alternativa do frontend
     
     // Produção - usando variáveis de ambiente
     process.env.RENDER_EXTERNAL_URL,     // Backend principal via env
     process.env.FRONTEND_URL,            // Frontend principal via env
     'https://mathkids.onrender.com',     // Frontend fallback
     'https://mathkids-front.onrender.com' // Frontend alternativo
-].filter(Boolean); // Remove valores undefined/null // Remove valores undefined/null
+].filter(Boolean); // Remove valores undefined/null
 
 console.log(`🔧 CORS Origins configured: ${allowedOrigins.length} origins`);
 console.log(`🔧 CORS Origins: ${allowedOrigins.join(', ')}`);
 
 app.use(cors({
     origin: function (origin, callback) {
+        // Em desenvolvimento, permite qualquer origem de localhost/127.0.0.1
+        if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+            if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+                return callback(null, true);
+            }
+        }
+        
         // Permite requisições sem origin (mobile apps, Postman, etc)
         if (!origin) return callback(null, true);
         
@@ -140,7 +149,9 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    preflightContinue: false,
+    optionsSuccessStatus: 200
 })); 
 
 // --- Configuração do Banco de Dados PostgreSQL ---
@@ -622,8 +633,8 @@ app.post('/api/forgot-password', async (req, res) => {
             });
         }
 
-        // Verificar se o usuário existe no banco
-        const query = 'SELECT id, email, nome_responsavel FROM usuarios WHERE email = $1';
+        // Verificar se o usuário existe no banco (usando busca case-insensitive)
+        const query = 'SELECT id, email, nome_responsavel FROM usuarios WHERE LOWER(TRIM(email)) = LOWER(TRIM($1))';
         const result = await pool.query(query, [email]);
 
         // Sempre retornar a mesma mensagem por segurança (não revelar se email existe)
@@ -631,6 +642,7 @@ app.post('/api/forgot-password', async (req, res) => {
 
         if (result.rows.length === 0) {
             console.log(`❌ Tentativa de reset para email não cadastrado: ${email}`);
+            console.log(`❌ Email pesquisado (normalizado): "${email.toLowerCase().trim()}"`);
             return res.json({ 
                 message: responseMessage,
                 resetAvailable: false
@@ -686,7 +698,15 @@ app.post('/api/forgot-password', async (req, res) => {
             console.log(`🔐 Token de reset gerado para usuário ${user.id}`);
             
             // Gerar link de reset
-            const baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+            let baseUrl;
+            if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+                // Em desenvolvimento, sempre use localhost:3000
+                baseUrl = 'http://localhost:3000';
+            } else {
+                // Em produção, use variável de ambiente ou host da requisição
+                baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+            }
+            
             const resetLink = `${baseUrl}/cadastro/reset-password.html?token=${resetToken}&email=${encodeURIComponent(email)}`;
             
             console.log(`📧 Link de reset gerado: ${resetLink}`);
@@ -805,7 +825,9 @@ app.post('/api/reset-password', async (req, res) => {
         }
 
         console.log(`🔄 Tentativa de reset de senha para: ${email}`);
-        console.log(`🔐 Token recebido (completo): ${token}`);
+        console.log(`🔐 Token recebido (primeiros 20 chars): ${token.substring(0, 20)}...`);
+        console.log(`🔐 Token recebido (length): ${token.length}`);
+        console.log(`📧 Email recebido (normalizado): ${email.toLowerCase().trim()}`);
 
         // Verificar se é admin (casos especiais)
         if (email === 'adm@email.com') {
@@ -823,19 +845,29 @@ app.post('/api/reset-password', async (req, res) => {
         }
 
         // Primeiro, verificar se existe algum token para este email
+        console.log(`🔍 Buscando tokens para email: "${email}"`);
         const debugQuery = `
             SELECT pr.id, pr.token_hash, pr.expires_at, pr.used, pr.created_at,
-                   u.email, u.id as user_id,
+                   u.email, u.id as user_id, u.nome_responsavel,
                    CURRENT_TIMESTAMP as current_time,
                    (pr.expires_at > CURRENT_TIMESTAMP) as is_valid_time
             FROM password_resets pr
             JOIN usuarios u ON pr.user_id = u.id
-            WHERE u.email = $1
+            WHERE LOWER(TRIM(u.email)) = LOWER(TRIM($1))
             ORDER BY pr.created_at DESC
+            LIMIT 10
         `;
         
         const debugResult = await pool.query(debugQuery, [email]);
         console.log(`🔍 Tokens encontrados para ${email}:`, debugResult.rows.length);
+        
+        // Log de todos os emails no banco para debug
+        const allEmailsQuery = 'SELECT email, id, nome_responsavel FROM usuarios ORDER BY id';
+        const allEmails = await pool.query(allEmailsQuery);
+        console.log('📧 Todos os emails no banco:');
+        allEmails.rows.forEach((row, idx) => {
+            console.log(`   ${idx + 1}. ID: ${row.id}, Email: "${row.email}", Nome: ${row.nome_responsavel}`);
+        });
         
         const currentTime = new Date();
         console.log(`⏰ Horário atual do servidor: ${currentTime.toISOString()}`);
@@ -857,31 +889,39 @@ app.post('/api/reset-password', async (req, res) => {
 
         // Buscar usuário e token válido (buscando por hash match)
         const query = `
-            SELECT u.id, u.email, pr.token_hash, pr.id as reset_id, pr.expires_at, pr.created_at,
+            SELECT u.id, u.email, u.nome_responsavel, pr.token_hash, pr.id as reset_id, pr.expires_at, pr.created_at,
                    CURRENT_TIMESTAMP as current_db_time,
                    (pr.expires_at > CURRENT_TIMESTAMP) as is_time_valid
             FROM usuarios u
             JOIN password_resets pr ON u.id = pr.user_id
-            WHERE u.email = $1 AND pr.expires_at > CURRENT_TIMESTAMP AND pr.used = FALSE
+            WHERE LOWER(TRIM(u.email)) = LOWER(TRIM($1)) 
+            AND pr.expires_at > CURRENT_TIMESTAMP 
+            AND pr.used = FALSE
             ORDER BY pr.created_at DESC
         `;
         
         const result = await pool.query(query, [email]);
-        console.log(`🔍 Tokens válidos encontrados: ${result.rows.length}`);
+        console.log(`🔍 Tokens válidos encontrados para "${email}": ${result.rows.length}`);
 
         // Procurar o token correto entre todos os válidos
         let resetData = null;
         let isValidToken = false;
         
+        console.log(`🔐 Iniciando verificação de ${result.rows.length} tokens válidos...`);
+        
         for (const row of result.rows) {
-            console.log(`🔐 Testando token ID ${row.reset_id}...`);
+            console.log(`🔐 Testando token ID ${row.reset_id} para usuário "${row.email}" (ID: ${row.id})...`);
+            console.log(`   - Token hash (primeiros 30 chars): ${row.token_hash.substring(0, 30)}...`);
+            console.log(`   - Criado em: ${row.created_at}`);
+            console.log(`   - Expira em: ${row.expires_at}`);
+            
             const testValid = await bcrypt.compare(token, row.token_hash);
-            console.log(`🔐 Match para ID ${row.reset_id}: ${testValid}`);
+            console.log(`🔐 Match para token ID ${row.reset_id}: ${testValid}`);
             
             if (testValid) {
                 resetData = row;
                 isValidToken = true;
-                console.log(`✅ Token correto encontrado - ID: ${row.reset_id}`);
+                console.log(`✅ Token correto encontrado - ID: ${row.reset_id} para usuário "${row.email}"`);
                 break;
             }
         }
@@ -891,10 +931,10 @@ app.post('/api/reset-password', async (req, res) => {
             
             // Debug: verificar se o token existe mas está expirado
             const expiredQuery = `
-                SELECT pr.id, pr.expires_at, pr.used, pr.created_at
+                SELECT pr.id, pr.expires_at, pr.used, pr.created_at, pr.token_hash, u.email
                 FROM password_resets pr
                 JOIN usuarios u ON pr.user_id = u.id
-                WHERE u.email = $1 AND pr.used = FALSE
+                WHERE LOWER(TRIM(u.email)) = LOWER(TRIM($1)) AND pr.used = FALSE
                 ORDER BY pr.created_at DESC
                 LIMIT 5
             `;
@@ -904,9 +944,13 @@ app.post('/api/reset-password', async (req, res) => {
             
             for (const row of expiredResult.rows) {
                 const testValid = await bcrypt.compare(token, row.token_hash);
+                console.log(`   - Token ID ${row.id}: hash match = ${testValid}, email = "${row.email}"`);
                 if (testValid) {
                     const isExpired = new Date() > new Date(row.expires_at);
-                    console.log(`🔍 Token encontrado mas ${isExpired ? 'EXPIRADO' : 'VÁLIDO'} - ID: ${row.id}`);
+                    console.log(`🔍 Token encontrado mas ${isExpired ? 'EXPIRADO' : 'VÁLIDO'} - ID: ${row.id} para email: "${row.email}"`);
+                    if (!isExpired) {
+                        console.log('❗ ATENÇÃO: Token válido encontrado mas não foi capturado na query principal!');
+                    }
                     break;
                 }
             }

@@ -2,7 +2,35 @@
 # GITIGNORE - MATHKIDS BACKEND
 # ================================================
 # Arquivo para proteger credenciais e dados sensíveis
-# ================================================
+# ==================# Arquivos compactados com dados
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Arquivos que podem conter dados sensíveis
+debug.log
+error.log
+access.log
+audit.log
+
+# MathKids specific
+# Email templates gerados
+email-templates/generated/
+temp-emails/
+
+# Backup de banco local
+backup-*.sql
+dump-*.sql
+
+# Uploads de teste
+test-uploads/
+sample-files/
+
+# Logs específicos do MathKids
+mathkids-*.log
+reset-password-*.log
+email-debug-*.txt===================
 
 # =====================================
 # CREDENCIAIS E CONFIGURAÇÕES SENSÍVEIS
@@ -54,7 +82,6 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

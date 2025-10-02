@@ -39,14 +39,45 @@ class RegistrationForm {
         const inputs = document.querySelectorAll('input[required]');
         inputs.forEach(input => {
             input.addEventListener('blur', () => this.validateField(input));
-            input.addEventListener('input', () => this.clearFieldError(input));
+            input.addEventListener('input', () => {
+                this.clearFieldError(input);
+                // Impede que o campo contenha apenas espaços
+                if (input.type === 'text' || input.type === 'email') {
+                    const trimmedValue = input.value.trim();
+                    if (input.value !== trimmedValue) {
+                        input.value = trimmedValue;
+                    }
+                }
+            });
         });
+
+        // Validação do checkbox de termos
+        const termosCheckbox = document.getElementById('termos');
+        if (termosCheckbox) {
+            termosCheckbox.addEventListener('change', () => {
+                this.clearFieldError(termosCheckbox);
+                // Valida imediatamente se os termos foram aceitos
+                if (!termosCheckbox.checked) {
+                    this.showFieldValidation(termosCheckbox, false, 'Você deve aceitar os termos para continuar');
+                } else {
+                    this.showFieldValidation(termosCheckbox, true, '');
+                }
+            });
+        }
     }
 
     validateField(field) {
         const value = field.value.trim();
         let isValid = true;
         let errorMessage = '';
+
+        // Validação básica: campo não pode estar vazio
+        if (!value || value.length === 0) {
+            isValid = false;
+            errorMessage = 'Este campo é obrigatório';
+            this.showFieldValidation(field, isValid, errorMessage);
+            return isValid;
+        }
 
         switch(field.type) {
             case 'email':
@@ -63,9 +94,35 @@ class RegistrationForm {
                 }
                 break;
             case 'text':
-                if (field.id === 'nome' && value.length < 2) {
-                    isValid = false;
-                    errorMessage = 'Nome muito curto';
+                if (field.id === 'nome') {
+                    if (value.length < 2) {
+                        isValid = false;
+                        errorMessage = 'Nome deve ter pelo menos 2 caracteres';
+                    } else if (!/^[a-zA-ZÀ-ſ\s]+$/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Nome deve conter apenas letras e espaços';
+                    }
+                }
+                break;
+            case 'date':
+                if (field.id === 'dataNascimento') {
+                    const birthDate = new Date(value);
+                    const currentYear = new Date().getFullYear();
+                    const birthYear = birthDate.getFullYear();
+                    
+                    if (isNaN(birthDate.getTime())) {
+                        isValid = false;
+                        errorMessage = 'Data inválida';
+                    } else if (birthYear > currentYear) {
+                        isValid = false;
+                        errorMessage = `Ano de nascimento não pode ser maior que ${currentYear}`;
+                    } else if (birthYear < 1900) {
+                        isValid = false;
+                        errorMessage = 'Ano de nascimento muito antigo';
+                    } else if (birthDate > new Date()) {
+                        isValid = false;
+                        errorMessage = 'Data de nascimento não pode ser no futuro';
+                    }
                 }
                 break;
         }
@@ -105,6 +162,19 @@ class RegistrationForm {
 
     async handleSubmit(event) {
         event.preventDefault();
+
+        // Primeira verificação: campos básicos não podem estar vazios
+        const nomeInput = document.getElementById('nome');
+        const emailInput = document.getElementById('email');
+        const senhaInput = document.getElementById('senha');
+        const dataInput = document.getElementById('dataNascimento');
+        const termosInput = document.getElementById('termos');
+
+        // Remove espaços em branco dos campos de texto
+        if (nomeInput) nomeInput.value = nomeInput.value.trim();
+        if (emailInput) emailInput.value = emailInput.value.trim();
+        if (senhaInput) senhaInput.value = senhaInput.value.trim();
+        if (dataInput) dataInput.value = dataInput.value.trim();
 
         const formData = this.getFormData();
         
@@ -155,19 +225,91 @@ class RegistrationForm {
     validateForm(formData) {
         const { nomeDoResponsavel, email, senha, dataDeNascimento, termosAceitos } = formData;
 
-        if (!nomeDoResponsavel || !email || !senha || !dataDeNascimento || !termosAceitos) {
-            this.showError('Todos os campos são obrigatórios e os termos devem ser aceitos.');
+        // Verificação rigorosa de campos vazios ou apenas com espaços
+        if (!nomeDoResponsavel || nomeDoResponsavel.trim().length === 0) {
+            this.showError('Nome do responsável é obrigatório.');
+            document.getElementById('nome').focus();
             return false;
         }
 
+        if (!email || email.trim().length === 0) {
+            this.showError('Email é obrigatório.');
+            document.getElementById('email').focus();
+            return false;
+        }
+
+        if (!senha || senha.trim().length === 0) {
+            this.showError('Senha é obrigatória.');
+            document.getElementById('senha').focus();
+            return false;
+        }
+
+        if (!dataDeNascimento || dataDeNascimento.trim().length === 0) {
+            this.showError('Data de nascimento é obrigatória.');
+            document.getElementById('dataNascimento').focus();
+            return false;
+        }
+
+        if (!termosAceitos) {
+            this.showError('Você deve aceitar os termos de uso para continuar.');
+            document.getElementById('termos').focus();
+            return false;
+        }
+
+        // Validação do nome
+        if (nomeDoResponsavel.trim().length < 2) {
+            this.showError('Nome deve ter pelo menos 2 caracteres.');
+            document.getElementById('nome').focus();
+            return false;
+        }
+
+        if (!/^[a-zA-ZÀ-ſ\s]+$/.test(nomeDoResponsavel.trim())) {
+            this.showError('Nome deve conter apenas letras e espaços.');
+            document.getElementById('nome').focus();
+            return false;
+        }
+
+        // Validação do email
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
+        if (!emailPattern.test(email.trim())) {
             this.showError('Email inválido.');
+            document.getElementById('email').focus();
             return false;
         }
 
-        if (senha.length < 6) {
+        // Validação da senha
+        if (senha.trim().length < 6) {
             this.showError('A senha deve ter no mínimo 6 caracteres.');
+            document.getElementById('senha').focus();
+            return false;
+        }
+
+        // Validação da data de nascimento
+        const birthDate = new Date(dataDeNascimento.trim());
+        if (isNaN(birthDate.getTime())) {
+            this.showError('Data de nascimento inválida.');
+            document.getElementById('dataNascimento').focus();
+            return false;
+        }
+
+        const currentYear = new Date().getFullYear();
+        const birthYear = birthDate.getFullYear();
+        
+        if (birthYear > currentYear) {
+            this.showError(`Ano de nascimento não pode ser maior que ${currentYear}.`);
+            document.getElementById('dataNascimento').focus();
+            return false;
+        }
+        
+        if (birthYear < 1900) {
+            this.showError('Ano de nascimento muito antigo.');
+            document.getElementById('dataNascimento').focus();
+            return false;
+        }
+        
+        if (birthDate > new Date()) {
+            this.showError('Data de nascimento não pode ser no futuro.');
+            document.getElementById('dataNascimento').focus();
             return false;
         }
 

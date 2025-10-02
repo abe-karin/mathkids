@@ -32,6 +32,11 @@ Esta página implementa o sistema de registro de usuários:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Conta - App Educativo</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐉</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="../favicon.ico">
+    
     <link rel="stylesheet" href="../assets/css/shared.css">
     <link rel="stylesheet" href="../assets/css/cadastro.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -76,5 +81,15 @@ Esta página implementa o sistema de registro de usuários:
     </div>
 
     <script src="../assets/js/registration.js"></script>
+    <script>
+        // Define dinamicamente a data máxima para o ano atual
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentYear = new Date().getFullYear();
+            const dateInput = document.getElementById('dataNascimento');
+            if (dateInput) {
+                dateInput.setAttribute('max', `${currentYear}-12-31`);
+            }
+        });
+    </script>
 </body>
 </html>

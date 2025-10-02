@@ -1,0 +1,26 @@
+{
+  "name": "mathkids-frontend",
+  "version": "1.0.0",
+  "description": "Frontend para aplicação MathKids",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000",
+    "build": "echo 'Build process for production'",
+    "dev": "live-server --port=3000"
+  },
+  "keywords": [
+    "html",
+    "css",
+    "javascript",
+    "frontend",
+    "mathkids"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
