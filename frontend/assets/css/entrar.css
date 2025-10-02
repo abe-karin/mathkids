@@ -362,13 +362,21 @@ input[type="password"] {
     cursor: pointer;
     transition: all 0.3s ease;
     border: none;
-    font-weight: 500;
+    font-weight: 500;   
+    height: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .secondary-btn {
     background: #f8f9fa;
     color: #6c757d;
     border: 2px solid #dee2e6;
+    /* Ajustar padding para compensar a borda e manter altura consistente */
+    padding: 10px 23px;
 }
 
 .secondary-btn:hover {
@@ -379,6 +387,8 @@ input[type="password"] {
 .primary-btn {
     background: var(--primary-green);
     color: white;
+    /* Manter padding padrão sem borda */
+    padding: 12px 25px;
 }
 
 .primary-btn:hover {
