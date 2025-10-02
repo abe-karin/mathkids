@@ -683,15 +683,16 @@ app.post('/api/forgot-password', async (req, res) => {
                     id SERIAL PRIMARY KEY,
                     user_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
                     token_hash VARCHAR(255) NOT NULL,
-                    expires_at TIMESTAMP NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                     used BOOLEAN DEFAULT FALSE
                 )
             `);
 
+            // Usar TIMESTAMP WITH TIME ZONE para garantir consistência
             await pool.query(
                 'INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
-                [user.id, resetTokenHash, expiresAt.toISOString()]
+                [user.id, resetTokenHash, expiresAt]
             );
 
             console.log(`🔐 Token de reset gerado para usuário ${user.id}`);
@@ -843,13 +844,13 @@ app.post('/api/reset-password', async (req, res) => {
             });
         }
 
-        // Primeiro, verificar se existe algum token para este email
+        // Primeiro, verificar se existe algum token para este email - com timezone UTC
         console.log(`🔍 Buscando tokens para email: "${email}"`);
         const debugQuery = `
             SELECT pr.id, pr.token_hash, pr.expires_at, pr.used, pr.created_at,
                    u.email, u.id as user_id, u.nome_responsavel,
-                   CURRENT_TIMESTAMP as current_time,
-                   (pr.expires_at > CURRENT_TIMESTAMP) as is_valid_time
+                   NOW() AT TIME ZONE 'UTC' as current_time,
+                   (pr.expires_at > NOW() AT TIME ZONE 'UTC') as is_valid_time
             FROM password_resets pr
             JOIN usuarios u ON pr.user_id = u.id
             WHERE LOWER(TRIM(u.email)) = LOWER(TRIM($1))
@@ -871,30 +872,35 @@ app.post('/api/reset-password', async (req, res) => {
         const currentTime = new Date();
         console.log(`⏰ Horário atual do servidor: ${currentTime.toISOString()}`);
         console.log(`⏰ Horário atual (local): ${currentTime.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`);
+        console.log(`⏰ Timezone do servidor: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+        console.log(`⏰ Offset UTC: ${currentTime.getTimezoneOffset()} minutos`);
         
         debugResult.rows.forEach((row, index) => {
             const expiresAt = new Date(row.expires_at);
             const createdAt = new Date(row.created_at);
+            const currentDbTime = new Date(row.current_time);
             const isExpired = currentTime > expiresAt;
+            const isExpiredVsDb = currentDbTime > expiresAt;
             
             console.log(`   ${index + 1}. ID: ${row.id}`);
             console.log(`      Usado: ${row.used}`);
             console.log(`      Criado: ${createdAt.toISOString()} (${createdAt.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })})`);
             console.log(`      Expira: ${expiresAt.toISOString()} (${expiresAt.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })})`);
             console.log(`      Válido no DB: ${row.is_valid_time}`);
-            console.log(`      Expirado (calc): ${isExpired}`);
-            console.log(`      DB Current Time: ${new Date(row.current_time).toISOString()}`);
+            console.log(`      Expirado (calc local): ${isExpired}`);
+            console.log(`      Expirado (calc vs DB): ${isExpiredVsDb}`);
+            console.log(`      DB Current Time: ${currentDbTime.toISOString()}`);
         });
 
-        // Buscar usuário e token válido (buscando por hash match)
+        // Buscar usuário e token válido (buscando por hash match) - com timezone UTC
         const query = `
             SELECT u.id, u.email, u.nome_responsavel, pr.token_hash, pr.id as reset_id, pr.expires_at, pr.created_at,
-                   CURRENT_TIMESTAMP as current_db_time,
-                   (pr.expires_at > CURRENT_TIMESTAMP) as is_time_valid
+                   NOW() AT TIME ZONE 'UTC' as current_db_time,
+                   (pr.expires_at > NOW() AT TIME ZONE 'UTC') as is_time_valid
             FROM usuarios u
             JOIN password_resets pr ON u.id = pr.user_id
             WHERE LOWER(TRIM(u.email)) = LOWER(TRIM($1)) 
-            AND pr.expires_at > CURRENT_TIMESTAMP 
+            AND pr.expires_at > NOW() AT TIME ZONE 'UTC'
             AND pr.used = FALSE
             ORDER BY pr.created_at DESC
         `;
