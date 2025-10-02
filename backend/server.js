@@ -121,38 +121,37 @@ const allowedOrigins = [
     // Produção - usando variáveis de ambiente
     process.env.RENDER_EXTERNAL_URL,     // Backend principal via env
     process.env.FRONTEND_URL,            // Frontend principal via env
-    'https://mathkids.onrender.com',     // Frontend fallback
-    'https://mathkids-front.onrender.com' // Frontend alternativo
+    'https://mathkids-3sz0.onrender.com/',     // Frontend 
+
 ].filter(Boolean); // Remove valores undefined/null
 
 console.log(`🔧 CORS Origins configured: ${allowedOrigins.length} origins`);
 console.log(`🔧 CORS Origins: ${allowedOrigins.join(', ')}`);
 
+// Configuração CORS simplificada - permitindo todas as origens temporariamente
 app.use(cors({
-    origin: function (origin, callback) {
-        // Em desenvolvimento, permite qualquer origem de localhost/127.0.0.1
-        if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-            if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
-                return callback(null, true);
-            }
-        }
-        
-        // Permite requisições sem origin (mobile apps, Postman, etc)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            console.log('CORS bloqueado para origem:', origin);
-            callback(new Error('Não permitido pelo CORS'));
-        }
-    },
+    origin: true, // Permite todas as origens
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    preflightContinue: false,
     optionsSuccessStatus: 200
 })); 
+
+// Middleware adicional para garantir headers CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // Responde diretamente a requisições OPTIONS
+    if (req.method === 'OPTIONS') {
+        console.log('✅ Respondendo a preflight OPTIONS para:', req.headers.origin);
+        return res.status(200).end();
+    }
+    
+    next();
+});
 
 // --- Configuração do Banco de Dados PostgreSQL ---
 // Suporta tanto variáveis locais (.env) quanto variáveis do Render
@@ -940,7 +939,7 @@ app.post('/api/reset-password', async (req, res) => {
             `;
             
             const expiredResult = await pool.query(expiredQuery, [email]);
-            console.log('� Verificando tokens recentes (incluindo expirados):');
+            console.log('  Verificando tokens recentes (incluindo expirados):');
             
             for (const row of expiredResult.rows) {
                 const testValid = await bcrypt.compare(token, row.token_hash);
